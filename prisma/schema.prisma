@@ -24,7 +24,7 @@ model item {
   id             String    @id @default(uuid())
   name           String
   description    String
-  starting_price Decimal   @default(0.00)
+  starting_price Float   @default(0.00)
   isSold         Boolean   @default(false)
   isApproved     Boolean   @default(false)
   owner_id       String
@@ -56,6 +56,6 @@ model bid {
   id         String   @id @default(uuid())
   auction_id String
   auction    auction  @relation(fields: [auction_id], references: [id])
-  price      Decimal  @default(0.00)
+  price      Float  @default(0.00)
   bid_time   DateTime @default(now())
 }

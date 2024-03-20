@@ -20,7 +20,11 @@
     "test:e2e": "NODE_ENV=test jest --config ./test/jest-e2e.json",
     "prepare": "husky",
     "migrate:dev": "dotenv -e .env.development -- npx prisma migrate dev",
-    "migrate:reset": "dotenv -e .env.development -- npx prisma migrate reset"
+    "migrate:reset": "dotenv -e .env.development -- npx prisma migrate reset",
+    "db:seed": "dotenv -e .env.development -- npx prisma db seed"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
