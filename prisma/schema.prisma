@@ -13,7 +13,8 @@ model user_ {
   email      String    @unique
   username   String    @unique
   password   String
-  isVerifies Boolean   @default(false)
+  location   String
+  isVerified Boolean   @default(false)
   role       String    @default("user")
   items      item[]
   auctions   auction[]

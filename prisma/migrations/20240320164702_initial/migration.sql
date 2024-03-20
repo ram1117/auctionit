@@ -5,7 +5,8 @@ CREATE TABLE "user_" (
     "email" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "isVerifies" BOOLEAN NOT NULL DEFAULT false,
+    "location" TEXT NOT NULL,
+    "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "role" TEXT NOT NULL DEFAULT 'user',
 
     CONSTRAINT "user__pkey" PRIMARY KEY ("id")
