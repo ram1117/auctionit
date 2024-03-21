@@ -18,6 +18,7 @@ model user_ {
   role       String    @default("user")
   items      item[]
   auctions   auction[]
+  bids       bid[]
 }
 
 model item {
@@ -59,6 +60,8 @@ model bid {
   id         String   @id @default(uuid())
   auction_id String
   auction    auction  @relation(fields: [auction_id], references: [id])
+  bidder_id  String
+  bidder     user_    @relation(fields: [bidder_id], references: [id])
   price      Float    @default(0.00)
   bid_time   DateTime @default(now())
   item       item?

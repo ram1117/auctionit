@@ -5,6 +5,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { APP_FILTER } from '@nestjs/core';
 import { ItemModule } from './item/item.module';
 import { AuctionModule } from './auction/auction.module';
+import { BidModule } from './bid/bid.module';
+import { SubscribeModule } from './subscribe/subscribe.module';
 import PrismaExceptionFilter from './filters/PrismaException.filter';
 
 @Module({
@@ -17,6 +19,8 @@ import PrismaExceptionFilter from './filters/PrismaException.filter';
     PrismaModule,
     ItemModule,
     AuctionModule,
+    BidModule,
+    SubscribeModule,
   ],
   controllers: [],
   providers: [
