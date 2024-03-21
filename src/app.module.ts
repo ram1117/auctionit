@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { APP_FILTER } from '@nestjs/core';
 import { ItemModule } from './item/item.module';
+import { AuctionModule } from './auction/auction.module';
 import PrismaExceptionFilter from './filters/PrismaException.filter';
 
 @Module({
@@ -15,6 +16,7 @@ import PrismaExceptionFilter from './filters/PrismaException.filter';
     }),
     PrismaModule,
     ItemModule,
+    AuctionModule,
   ],
   controllers: [],
   providers: [
