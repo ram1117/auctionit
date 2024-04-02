@@ -47,7 +47,7 @@ model auction {
   id            String   @id @default(uuid())
   item_id       String
   item          item     @relation(fields: [item_id], references: [id])
-  deadline      DateTime
+  deadline      DateTime @default(dbgenerated("NOW() + interval '24 hours'"))
   createdAt     DateTime @default(now())
   start_value   Float    @default(0.00)
   current_value Float?   @default(0.00)

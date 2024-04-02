@@ -11,7 +11,7 @@ export class BidService {
   }
 
   async createOrUpdate(data: CreateBidDto) {
-    const bid = await this.prisma.bid.findFirstOrThrow({
+    const bid = await this.prisma.bid.findFirst({
       where: {
         AND: { bidder_id: data.bidder_id, auction_id: data.auction_id },
       },

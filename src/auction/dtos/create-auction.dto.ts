@@ -1,9 +1,10 @@
-import { IsString, IsDate } from 'class-validator';
+import { IsString, IsDate, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 class CreateAuctionDto {
   @IsString()
   item_id: string;
+  @IsOptional()
   @IsDate()
   deadline: string;
 
