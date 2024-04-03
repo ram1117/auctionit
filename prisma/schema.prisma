@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model user_ {
+  id         String    @id @default(uuid())
+  fullname   String
+  email      String    @unique
+  username   String    @unique
+  password   String
+  location   String
+  isVerified Boolean   @default(false)
+  role       String    @default("user")
+  items      item[]
+  auctions   auction[]
+  bids       bid[]
+}
+
+model item {
+  id             String    @id @default(uuid())
+  name           String
+  description    String
+  isSold         Boolean   @default(false)
+  isApproved     Boolean   @default(false)
+  owner_id       String
+  owner          user_     @relation(fields: [owner_id], references: [id])
+  item_type_id   Int
+  item_type      item_type @relation(fields: [item_type_id], references: [id])
+  auctions       auction[]
+  winning_bid_id String?   @unique
+  winning_bid    bid?      @relation(fields: [winning_bid_id], references: [id])
+}
+
+model item_type {
+  id          Int     @id @default(autoincrement())
+  type        String
+  description String?
+  items       item[]
+}
+
+model auction {
+  id            String   @id @default(uuid())
+  item_id       String
+  item          item     @relation(fields: [item_id], references: [id])
+  deadline      DateTime @default(dbgenerated("NOW() + interval '24 hours'"))
+  createdAt     DateTime @default(now())
+  start_value   Float    @default(0.00)
+  creater_id    String
+  creator       user_    @relation(fields: [creater_id], references: [id])
+  bids          bid[]
+}
+
+model bid {
+  id         String   @id @default(uuid())
+  auction_id String
+  auction    auction  @relation(fields: [auction_id], references: [id])
+  bidder_id  String
+  bidder     user_    @relation(fields: [bidder_id], references: [id])
+  price      Float    @default(0.00)
+  bid_time   DateTime @default(now())
+  item       item?
+}
