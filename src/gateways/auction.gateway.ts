@@ -23,11 +23,15 @@ export class AuctionGateway {
   async joinRoom(client: Socket, roomId: string): Promise<void> {
     await client.join(roomId);
     const top_bid = await this.bidService.findOne(roomId);
-    console.log(client.id);
-    this.server.to(roomId).emit('place_bid_join', {
-      value: top_bid.price,
-      username: top_bid.bidder.username,
-    });
+    const payload = top_bid
+      ? {
+          value: top_bid.price,
+          username: top_bid.bidder.username,
+          time: top_bid.bid_time,
+        }
+      : { message: 'No bids placed yet' };
+
+    this.server.to(roomId).emit('new_bid_placed', payload);
   }
 
   @SubscribeMessage('place-bid-leave')

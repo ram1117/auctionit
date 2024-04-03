@@ -50,7 +50,6 @@ model auction {
   deadline      DateTime @default(dbgenerated("NOW() + interval '24 hours'"))
   createdAt     DateTime @default(now())
   start_value   Float    @default(0.00)
-  current_value Float?   @default(0.00)
   creater_id    String
   creator       user_    @relation(fields: [creater_id], references: [id])
   bids          bid[]
