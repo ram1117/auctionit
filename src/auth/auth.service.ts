@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
-import { SigninDto } from './dtos/signin.dto';
 
 @Injectable()
 export class AuthService {
   constructor(private userService: UserService) {}
 
-  async validateUser(data: SigninDto) {
-    const user = await this.userService.findOne(data.username);
+  async validateUser(username: string, password: string) {
+    console.log(username, password);
+    const user = await this.userService.findOne(username);
     if (user) {
-      const isMatch = await bcrypt.compare(data.password, user.password);
+      const isMatch = await bcrypt.compare(password, user.password);
       if (isMatch) {
         return user;
       }
