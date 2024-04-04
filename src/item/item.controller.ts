@@ -1,19 +1,20 @@
 import { Controller, Get, Post, Param, Body } from '@nestjs/common';
 import { ItemService } from './item.service';
 import CreateItemDto from './dtos/CreateItem.dto';
+import { User } from '../decorators/user.decorator';
 
 @Controller('item')
 export class ItemController {
   constructor(private itemService: ItemService) {}
 
-  @Get(':userid')
-  allItems(@Param('userid') userid: string) {
-    return this.itemService.findManyByUser(userid);
+  @Get()
+  allItems(@User() user: any) {
+    return this.itemService.findManyByUser(user.id);
   }
 
-  @Get(':userid/:id')
-  getItemById(@Param('userid') userid: string, @Param('id') id: string) {
-    return this.itemService.findOne(userid, id);
+  @Get(':id')
+  getItemById(@User() user: any, @Param('id') id: string) {
+    return this.itemService.findOne(user.id, id);
   }
 
   @Post()
