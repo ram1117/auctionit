@@ -7,6 +7,7 @@ import { ItemModule } from './item/item.module';
 import { AuctionModule } from './auction/auction.module';
 import { BidModule } from './bid/bid.module';
 import { SubscribeModule } from './subscribe/subscribe.module';
+import { AuthModule } from './auth/auth.module';
 import PrismaExceptionFilter from './filters/PrismaException.filter';
 
 @Module({
@@ -21,6 +22,7 @@ import PrismaExceptionFilter from './filters/PrismaException.filter';
     AuctionModule,
     BidModule,
     SubscribeModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [

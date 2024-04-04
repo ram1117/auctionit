@@ -28,7 +28,7 @@ export class BidController {
   @Post()
   async createBid(@Body() data: CreateBidDto) {
     const auction = await this.auctionService.findOne(data.auction_id);
-    if (auction.deadline > new Date()) {
+    if (auction.deadline < new Date()) {
       throw new ForbiddenException('Auction might have ended');
     }
 
