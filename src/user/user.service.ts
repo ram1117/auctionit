@@ -13,6 +13,10 @@ export class UserService {
     return new UserEntity(user);
   }
 
+  async findOneById(id: string) {
+    return this.prisma.user_.findUnique({ where: { id } });
+  }
+
   async create(data: CreateUserDto) {
     const { password, ...rest } = data;
     const hashedPwd = await bcrypt.hash(password, 10);

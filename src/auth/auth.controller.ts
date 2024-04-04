@@ -10,6 +10,7 @@ import { UserService } from '../user/user.service';
 import CreateUserDto from '../user/dtos/createuser.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -37,6 +38,7 @@ export class AuthController {
     return this.userService.create(data);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('signout')
   signout() {}
 }

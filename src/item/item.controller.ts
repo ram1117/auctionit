@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, UseGuards } from '@nestjs/common';
 import { ItemService } from './item.service';
 import CreateItemDto from './dtos/CreateItem.dto';
 import { User } from '../decorators/user.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('item')
 export class ItemController {
   constructor(private itemService: ItemService) {}

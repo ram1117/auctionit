@@ -6,12 +6,15 @@ import {
   Body,
   Delete,
   ForbiddenException,
+  UseGuards,
 } from '@nestjs/common';
 import { BidService } from './bid.service';
 import CreateBidDto from './dtos/createBid.dto';
 import { AuctionGateway } from '../gateways/auction.gateway';
 import { AuctionService } from '../auction/auction.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('bid')
 export class BidController {
   constructor(
