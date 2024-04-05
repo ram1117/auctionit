@@ -40,4 +40,11 @@ export class ItemController {
   approveItem(@Param('id') id: string) {
     return this.itemService.updateApproval(id);
   }
+
+  @Roles(USER_ROLES.Admin)
+  @UseGuards(RolesGuard)
+  @Get('unapproved')
+  getAllUnapprovedItems() {
+    return this.itemService.findUnapproved();
+  }
 }

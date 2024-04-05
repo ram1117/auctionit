@@ -13,6 +13,7 @@ import CreateBidDto from './dtos/createBid.dto';
 import { AuctionGateway } from '../gateways/auction.gateway';
 import { AuctionService } from '../auction/auction.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { User } from '../decorators/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('bid')
@@ -29,7 +30,7 @@ export class BidController {
   }
 
   @Post()
-  async createBid(@Body() data: CreateBidDto) {
+  async createBid(@Body() data: CreateBidDto, @User() user: any) {
     const auction = await this.auctionService.findOne(data.auction_id);
     if (auction.deadline < new Date()) {
       throw new ForbiddenException('Auction might have ended');
@@ -38,12 +39,12 @@ export class BidController {
     if (auction.creater_id === '') {
       throw new ForbiddenException('You cannot place your bid in this auction');
     }
-    const response = await this.bidService.createOrUpdate(data);
+    const response = await this.bidService.createOrUpdate(data, user.id);
 
     const socketResponse: any = { ...response };
     this.auctionGateway.placeBidInRoom(socketResponse.auction_id, {
       value: response.price,
-      username: response.bidder.username,
+      username: user.username,
     });
     return {
       message: 'Bid has been placed successfully',

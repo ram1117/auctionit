@@ -11,8 +11,17 @@ export class AuctionService {
     return await this.prisma.auction.findUniqueOrThrow({ where: { id } });
   }
 
-  async findMany() {
-    return await this.prisma.auction.findMany();
+  async findMany(userId: string) {
+    return await this.prisma.auction.findMany({
+      where: { creater_id: userId },
+    });
+  }
+
+  async findLive() {
+    return await this.prisma.auction.findMany({
+      where: { isComplete: false },
+      include: { creator: true },
+    });
   }
 
   async createOne(data: CreateAuctionDto) {

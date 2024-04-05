@@ -14,10 +14,10 @@ export class BidService {
     });
   }
 
-  async createOrUpdate(data: CreateBidDto) {
+  async createOrUpdate(data: CreateBidDto, userId: string) {
     const bid = await this.prisma.bid.findFirst({
       where: {
-        AND: { bidder_id: data.bidder_id, auction_id: data.auction_id },
+        AND: { bidder_id: userId, auction_id: data.auction_id },
       },
     });
 
@@ -29,7 +29,7 @@ export class BidService {
       });
 
     return await this.prisma.bid.create({
-      data: { ...data, bid_time: new Date() },
+      data: { ...data, bid_time: new Date(), bidder_id: userId },
       include: { bidder: true },
     });
   }

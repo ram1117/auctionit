@@ -28,4 +28,8 @@ export class ItemService {
     });
     return { message: 'item approved' };
   }
+
+  async findUnapproved() {
+    return await this.prisma.item.findMany({ where: { isApproved: false } });
+  }
 }

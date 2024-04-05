@@ -22,9 +22,14 @@ export class AuctionController {
     private itemService: ItemService,
   ) {}
 
-  @Get()
-  getAuctions() {
-    return this.auctionService.findMany();
+  @Get('user')
+  getAuctions(@User() user: any) {
+    return this.auctionService.findMany(user.id);
+  }
+
+  @Get('live')
+  getLiveAuctions() {
+    return this.auctionService.findLive();
   }
 
   @Get(':id')

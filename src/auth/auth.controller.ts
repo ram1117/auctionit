@@ -40,5 +40,8 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('signout')
-  signout() {}
+  signout(@Response({ passthrough: true }) res: any) {
+    res.clearCookie('token');
+    return { message: 'signed out successfully' };
+  }
 }
