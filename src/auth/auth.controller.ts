@@ -30,7 +30,7 @@ export class AuthController {
       sameSite: 'strict',
       httpOnly: true,
     });
-    return { message: 'Loging Success' };
+    return { message: 'Signin Successful' };
   }
 
   @Post('signup')

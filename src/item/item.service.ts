@@ -14,6 +14,7 @@ export class ItemService {
       where: { AND: [{ id }, { owner_id: userid }] },
     });
   }
+
   async create(data: CreateItemDto, userId: string) {
     const dataWithId = { ...data, owner_id: userId };
     await this.prisma.item.create({ data: dataWithId });
