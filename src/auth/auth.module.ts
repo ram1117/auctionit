@@ -19,7 +19,7 @@ import { LocalStrategy } from './strategy/local.strategy';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('SECRET_KEY'),
         signOptions: {
-          expiresIn: '60s',
+          expiresIn: '300s',
         },
       }),
       inject: [ConfigService],
