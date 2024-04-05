@@ -1,7 +1,17 @@
-import { Controller, Get, Post, Patch, Param, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Param,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import CreateAuctionDto from './dtos/create-auction.dto';
 import { AuctionService } from './auction.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('auction')
 export class AuctionController {
   constructor(private auctionService: AuctionService) {}

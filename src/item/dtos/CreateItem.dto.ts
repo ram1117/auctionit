@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsString, IsOptional, MinLength, MaxLength } from 'class-validator';
+import { IsString, MinLength, MaxLength, IsNumber } from 'class-validator';
 
 class CreateItemDto {
   @IsString()
@@ -12,13 +12,7 @@ class CreateItemDto {
   @MaxLength(240)
   description: string;
 
-  @Transform(({ value }) => Number.parseFloat(value))
-  @IsOptional()
-  starting_price: number;
-
-  @IsString()
-  owner_id: string;
-
+  @IsNumber()
   @Transform(({ value }) => Number.parseInt(value))
   item_type_id: number;
 }

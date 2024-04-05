@@ -14,8 +14,17 @@ export class ItemService {
       where: { AND: [{ id }, { owner_id: userid }] },
     });
   }
-  async create(data: CreateItemDto) {
-    await this.prisma.item.create({ data });
+  async create(data: CreateItemDto, userId: string) {
+    const dataWithId = { ...data, owner_id: userId };
+    await this.prisma.item.create({ data: dataWithId });
     return { message: 'Item created successfully' };
+  }
+
+  async updateApproval(id: string) {
+    await this.prisma.item.update({
+      where: { id },
+      data: { isApproved: true },
+    });
+    return { message: 'item approved' };
   }
 }
