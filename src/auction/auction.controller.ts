@@ -10,15 +10,21 @@ import {
 import CreateAuctionDto from './dtos/create-auction.dto';
 import { AuctionService } from './auction.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { User } from '../decorators/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('auction')
 export class AuctionController {
   constructor(private auctionService: AuctionService) {}
 
-  @Get(':userid')
-  getAuctions() {
-    return this.auctionService.findMany();
+  @Get('user')
+  getAuctions(@User() user: any) {
+    return this.auctionService.findMany(user.id);
+  }
+
+  @Get('live')
+  getLiveAuctions() {
+    return this.auctionService.findLive();
   }
 
   @Get(':id')
@@ -27,8 +33,8 @@ export class AuctionController {
   }
 
   @Post()
-  createAuction(@Body() data: CreateAuctionDto) {
-    return this.auctionService.createOne(data);
+  async createAuction(@Body() data: CreateAuctionDto, @User() user: any) {
+    return this.auctionService.createOne(data, user.id);
   }
 
   @Patch(':id')

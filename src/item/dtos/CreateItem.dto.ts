@@ -9,7 +9,6 @@ class CreateItemDto {
 
   @IsString()
   @MinLength(10)
-  @MaxLength(240)
   description: string;
 
   @IsNumber()

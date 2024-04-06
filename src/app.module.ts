@@ -9,6 +9,7 @@ import { BidModule } from './bid/bid.module';
 import { SubscribeModule } from './subscribe/subscribe.module';
 import { AuthModule } from './auth/auth.module';
 import PrismaExceptionFilter from './filters/PrismaException.filter';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import PrismaExceptionFilter from './filters/PrismaException.filter';
     BidModule,
     SubscribeModule,
     AuthModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [],
   providers: [

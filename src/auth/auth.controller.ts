@@ -30,7 +30,7 @@ export class AuthController {
       sameSite: 'strict',
       httpOnly: true,
     });
-    return { message: 'Loging Success' };
+    return { message: 'Signin Successful' };
   }
 
   @Post('signup')
@@ -40,5 +40,8 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('signout')
-  signout() {}
+  signout(@Response({ passthrough: true }) res: any) {
+    res.clearCookie('token');
+    return { message: 'signed out successfully' };
+  }
 }

@@ -24,14 +24,14 @@ export class ItemController {
     return this.itemService.findManyByUser(user.id);
   }
 
-  @Get(':id')
-  getItemById(@User() user: any, @Param('id') id: string) {
-    return this.itemService.findOne(user.id, id);
-  }
-
   @Post()
   createItem(@Body() data: CreateItemDto, @User() user: any) {
     return this.itemService.create(data, user.id);
+  }
+
+  @Get(':id')
+  getItemById(@User() user: any, @Param('id') id: string) {
+    return this.itemService.findOne(user.id, id);
   }
 
   @Roles(USER_ROLES.Admin)
@@ -39,5 +39,12 @@ export class ItemController {
   @Patch('approve/:id')
   approveItem(@Param('id') id: string) {
     return this.itemService.updateApproval(id);
+  }
+
+  @Roles(USER_ROLES.Admin)
+  @UseGuards(RolesGuard)
+  @Get('unapproved/all')
+  getAllUnapprovedItems() {
+    return this.itemService.findUnapproved();
   }
 }

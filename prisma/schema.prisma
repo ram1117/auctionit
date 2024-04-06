@@ -44,15 +44,16 @@ model item_type {
 }
 
 model auction {
-  id            String   @id @default(uuid())
-  item_id       String
-  item          item     @relation(fields: [item_id], references: [id])
-  deadline      DateTime @default(dbgenerated("NOW() + interval '24 hours'"))
-  createdAt     DateTime @default(now())
-  start_value   Float    @default(0.00)
-  creater_id    String
-  creator       user_    @relation(fields: [creater_id], references: [id])
-  bids          bid[]
+  id          String   @id @default(uuid())
+  item_id     String
+  item        item     @relation(fields: [item_id], references: [id])
+  deadline    DateTime @default(dbgenerated("NOW() + interval '24 hours'"))
+  isComplete  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  start_value Float    @default(0.00)
+  creater_id  String
+  creator     user_    @relation(fields: [creater_id], references: [id])
+  bids        bid[]
 }
 
 model bid {
