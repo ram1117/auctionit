@@ -36,7 +36,7 @@ export class BidController {
       throw new ForbiddenException('Auction might have ended');
     }
 
-    if (auction.creater_id === '') {
+    if (auction.creater_id === user.id) {
       throw new ForbiddenException('You cannot place your bid in this auction');
     }
     const response = await this.bidService.createOrUpdate(data, user.id);

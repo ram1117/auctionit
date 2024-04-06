@@ -9,6 +9,7 @@ export class ItemService {
   async findManyByUser(userid: string) {
     return await this.prisma.item.findMany({ where: { owner_id: userid } });
   }
+
   async findOne(userid: string, id: string) {
     return await this.prisma.item.findFirstOrThrow({
       where: { AND: [{ id }, { owner_id: userid }] },
@@ -30,6 +31,8 @@ export class ItemService {
   }
 
   async findUnapproved() {
-    return await this.prisma.item.findMany({ where: { isApproved: false } });
+    return await this.prisma.item.findMany({
+      where: { isApproved: false },
+    });
   }
 }
