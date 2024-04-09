@@ -23,11 +23,10 @@ export class ItemService {
   }
 
   async updateApproval(id: string) {
-    await this.prisma.item.update({
+    return await this.prisma.item.update({
       where: { id },
       data: { isApproved: true },
     });
-    return { message: 'item approved' };
   }
 
   async findUnapproved() {

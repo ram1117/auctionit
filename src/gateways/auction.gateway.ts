@@ -42,4 +42,8 @@ export class AuctionGateway {
   public placeBidInRoom(roomId: string, payload: any) {
     this.server.to(roomId).emit('new_bid_placed', payload);
   }
+
+  public postAuctionEnd(roomId: string, payload: any) {
+    this.server.to(roomId).emit('auction_end', payload);
+  }
 }

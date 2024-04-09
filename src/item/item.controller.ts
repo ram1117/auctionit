@@ -37,8 +37,18 @@ export class ItemController {
   @Roles(USER_ROLES.Admin)
   @UseGuards(RolesGuard)
   @Patch('approve/:id')
-  approveItem(@Param('id') id: string) {
-    return this.itemService.updateApproval(id);
+  async approveItem(@Param('id') id: string) {
+    const item = await this.itemService.updateApproval(id);
+    if (!item) {
+      return { error: true, message: 'Error approving the item' };
+    }
+    // const payload = {
+    //   success: true,
+    //   message: 'Item approved for auction',
+    //   href: `item/${item.id}`,
+    // };
+    // this.auctionGateway.sendUserNotification(item.id, payload);
+    return { success: true, message: 'Item approved for auction' };
   }
 
   @Roles(USER_ROLES.Admin)

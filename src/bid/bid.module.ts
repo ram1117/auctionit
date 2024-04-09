@@ -8,5 +8,6 @@ import { AuctionModule } from '../auction/auction.module';
   controllers: [BidController],
   providers: [BidService, AuctionGateway],
   imports: [AuctionModule],
+  exports: [AuctionGateway],
 })
 export class BidModule {}

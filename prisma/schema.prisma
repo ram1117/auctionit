@@ -8,17 +8,18 @@ datasource db {
 }
 
 model user_ {
-  id         String    @id @default(uuid())
-  fullname   String
-  email      String    @unique
-  username   String    @unique
-  password   String
-  location   String
-  isVerified Boolean   @default(false)
-  role       String    @default("user")
-  items      item[]
-  auctions   auction[]
-  bids       bid[]
+  id                  String               @id @default(uuid())
+  fullname            String
+  email               String               @unique
+  username            String               @unique
+  password            String
+  location            String
+  isVerified          Boolean              @default(false)
+  role                String               @default("user")
+  items               item[]
+  auctions            auction[]
+  bids                bid[]
+  notification_tokens notification_token[]
 }
 
 model item {
@@ -65,4 +66,25 @@ model bid {
   price      Float    @default(0.00)
   bid_time   DateTime @default(now())
   item       item?
+}
+
+model notification {
+  id                   String             @id @default(uuid())
+  notification_token   notification_token @relation(fields: [notification_tokenId], references: [id])
+  notification_tokenId String
+  title                String
+  body                 String
+  href                 String?
+  createdAt            DateTime           @default(now())
+  active               Boolean            @default(true)
+}
+
+model notification_token {
+  id                 String         @id @default(uuid())
+  user_id            String
+  user               user_          @relation(fields: [user_id], references: [id])
+  device_type        String
+  notification_token String
+  active             Boolean        @default(true)
+  notifications      notification[]
 }
