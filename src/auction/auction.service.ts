@@ -6,10 +6,14 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import CreateAuctionDto from './dtos/create-auction.dto';
 import { Interval } from '@nestjs/schedule';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class AuctionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationService: NotificationService,
+  ) {}
 
   async findOne(id: string) {
     return await this.prisma.auction.findUniqueOrThrow({ where: { id } });
@@ -88,6 +92,14 @@ export class AuctionService {
         where: { id: auction.id },
         data: { isComplete: true },
       });
+
+      const pushMessage = {
+        title: 'Auction ended',
+        data: hasBids ? 'Sold' : 'Unsold',
+        href: `/auction/${auction.id}`,
+      };
+
+      await this.notificationService.sendPush(auction.id, pushMessage);
     });
   }
 }

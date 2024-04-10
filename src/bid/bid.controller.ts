@@ -14,6 +14,7 @@ import { AuctionGateway } from '../gateways/auction.gateway';
 import { AuctionService } from '../auction/auction.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { User } from '../decorators/user.decorator';
+import { NotificationService } from '../notification/notification.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('bid')
@@ -22,6 +23,7 @@ export class BidController {
     private bidService: BidService,
     private auctionService: AuctionService,
     private auctionGateway: AuctionGateway,
+    private notificationService: NotificationService,
   ) {}
 
   @Get(':auctionId')
@@ -40,12 +42,17 @@ export class BidController {
       throw new ForbiddenException('You cannot place your bid in this auction');
     }
     const response = await this.bidService.createOrUpdate(data, user.id);
+    const payload = { value: response.price, username: user.username };
 
-    const socketResponse: any = { ...response };
-    this.auctionGateway.placeBidInRoom(socketResponse.auction_id, {
-      value: response.price,
-      username: user.username,
-    });
+    this.auctionGateway.placeBidInRoom(response.auction_id, payload);
+
+    const pushMessage = {
+      title: 'New Bid Alert',
+      data: `${payload.value} by ${payload.username}`,
+      href: `/auction/${response.auction_id}`,
+    };
+
+    this.notificationService.sendPush(response.auction_id, pushMessage);
     return {
       message: 'Bid has been placed successfully',
     };

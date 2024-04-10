@@ -16,7 +16,6 @@ export class NotificationController {
 
   @Post('subscribe/:id')
   subscribeTopic(@Param('id') auction_id: string, @User() user: any) {
-    console.log(auction_id);
     return this.notificationService.subscribeTopic(user.id, auction_id);
   }
 

@@ -20,17 +20,12 @@ export class NotificationService {
 
   async acceptPushNotification(userId: string, data: AcceptNotificationDto) {
     const token = await this.prisma.notification_token.findFirst({
-      where: { user_id: userId },
+      where: { notification_token: data.notification_token },
     });
-    if (!token) {
+    if (!token)
       return await this.prisma.notification_token.create({
         data: { ...data, user_id: userId },
       });
-    }
-    return await this.prisma.notification_token.update({
-      where: { id: token.id },
-      data: { notification_token: data.notification_token },
-    });
   }
 
   async subscribeTopic(userId: string, auction_id: string) {
@@ -39,8 +34,6 @@ export class NotificationService {
         where: { user_id: userId },
       })
     ).map((token) => token.notification_token);
-
-    console.log(tokens);
 
     return await firebase.messaging().subscribeToTopic(tokens, auction_id);
   }
@@ -55,24 +48,13 @@ export class NotificationService {
   }
 
   async disablePushNotification(token_id: string) {
-    return await this.prisma.notification_token.update({
+    return await this.prisma.notification_token.delete({
       where: { notification_token: token_id },
-      data: { active: false },
     });
   }
 
-  async getNotifications() {
-    const auctionId = '2777781a-d8c8-4e27-936e-ca681ca3bd0f';
-    console.log('sending push message ', new Date());
-    const data = {
-      title: 'New Bid Alert',
-      message: 'for',
-      href: `/auction/2777781a-d8c8-4e27-936e-ca681ca3bd0f`,
-    };
-    this.sendPush(auctionId, data);
-  }
-
   async sendPush(auction_id: string, notificationData: any) {
+    console.log('sending push message ', new Date());
     await firebase
       .messaging()
       .send({
