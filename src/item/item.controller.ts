@@ -13,11 +13,15 @@ import { User } from '../decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles, USER_ROLES } from '../decorators/roles.decorator.';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { NotificationService } from '../notification/notification.service';
 
 @Controller('item')
 @UseGuards(JwtAuthGuard)
 export class ItemController {
-  constructor(private itemService: ItemService) {}
+  constructor(
+    private itemService: ItemService,
+    private notificationService: NotificationService,
+  ) {}
 
   @Get()
   allItems(@User() user: any) {
@@ -39,15 +43,10 @@ export class ItemController {
   @Patch('approve/:id')
   async approveItem(@Param('id') id: string) {
     const item = await this.itemService.updateApproval(id);
+
     if (!item) {
       return { error: true, message: 'Error approving the item' };
     }
-    // const payload = {
-    //   success: true,
-    //   message: 'Item approved for auction',
-    //   href: `item/${item.id}`,
-    // };
-    // this.auctionGateway.sendUserNotification(item.id, payload);
     return { success: true, message: 'Item approved for auction' };
   }
 

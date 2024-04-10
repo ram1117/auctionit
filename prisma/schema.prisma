@@ -84,7 +84,7 @@ model notification_token {
   user_id            String
   user               user_          @relation(fields: [user_id], references: [id])
   device_type        String
-  notification_token String
+  notification_token String         @unique
   active             Boolean        @default(true)
   notifications      notification[]
 }
