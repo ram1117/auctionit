@@ -22,6 +22,14 @@ async function bootstrap() {
   );
   app.use(cookieParser());
   app.setGlobalPrefix('api/v1');
+
+  const corsOptions = {
+    credentials: true,
+    origin: 'http://localhost:3000',
+  };
+
+  app.enableCors(corsOptions);
+
   await app.listen(3001);
 }
 bootstrap();
