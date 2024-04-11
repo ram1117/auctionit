@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import CreateBidDto from './dtos/createBid.dto';
+import { SubscribeService } from '../subscribe/subscribe.service';
 
 @Injectable()
 export class BidService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private subscribeService: SubscribeService,
+  ) {}
 
   async findOne(id: string) {
     return await this.prisma.bid.findFirst({
@@ -21,15 +25,17 @@ export class BidService {
       },
     });
 
-    if (bid)
-      return await this.prisma.bid.update({
-        where: { id: bid.id },
-        data: { price: data.price, bid_time: new Date() },
+    if (!bid) {
+      await this.subscribeService.create(userId, data.auction_id);
+      return await this.prisma.bid.create({
+        data: { ...data, bid_time: new Date(), bidder_id: userId },
         include: { bidder: true },
       });
+    }
 
-    return await this.prisma.bid.create({
-      data: { ...data, bid_time: new Date(), bidder_id: userId },
+    return await this.prisma.bid.update({
+      where: { id: bid.id },
+      data: { price: data.price, bid_time: new Date() },
       include: { bidder: true },
     });
   }

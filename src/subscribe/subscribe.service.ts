@@ -5,6 +5,12 @@ import { PrismaService } from '../prisma/prisma.service';
 export class SubscribeService {
   constructor(private prisma: PrismaService) {}
 
+  async findMany(userId: string) {
+    return await this.prisma.subscription.findMany({
+      where: { user_id: userId },
+    });
+  }
+
   async create(userId: string, auctionId: string) {
     return await this.prisma.subscription.create({
       data: { user_id: userId, auction_id: auctionId },
