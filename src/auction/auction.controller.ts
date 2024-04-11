@@ -25,14 +25,16 @@ export class AuctionController {
 
   @Get('live')
   getLiveAuctions(
-    @Query('sord') sortBy: string = 'newest',
+    @Query('sort') sortBy: string = 'newest',
     @Query('page') pageNo: string = '1',
     @Query('items') itemsPerPage: string = '50',
+    @Query('category') category_id: string = '0',
   ) {
     return this.auctionService.findLive(
       sortBy,
       parseInt(pageNo),
       parseInt(itemsPerPage),
+      parseInt(category_id),
     );
   }
 

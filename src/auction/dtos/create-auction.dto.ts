@@ -11,6 +11,10 @@ class CreateAuctionDto {
   @IsNumber()
   @Transform(({ value }) => Number.parseFloat(value))
   start_value: number;
+
+  @IsNumber()
+  @Transform(({ value }) => Number.parseInt(value))
+  auction_categoryId: number;
 }
 
 export default CreateAuctionDto;

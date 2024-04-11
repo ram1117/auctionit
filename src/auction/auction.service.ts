@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import CreateAuctionDto from './dtos/create-auction.dto';
 import { Interval } from '@nestjs/schedule';
 import { NotificationService } from '../notification/notification.service';
+import { AUCTION_SORT_KEY } from '../constants/auctionSort';
 
 @Injectable()
 export class AuctionService {
@@ -26,44 +27,28 @@ export class AuctionService {
     });
   }
 
-  private generateSortingObject(sortBy: string) {
-    const orderByNew = { createdAt: 'desc' } as const;
-    const orderByEndTime = { deadline: 'desc' } as const;
-    const orderByPopular = {
-      bids: { _count: 'desc' },
-    } as const;
-
-    let sortByCondition: any;
-    switch (sortBy) {
-      case 'popular':
-        sortByCondition = orderByPopular;
-        break;
-      case 'deadline':
-        sortByCondition = orderByEndTime;
-        break;
-      case 'newest':
-        sortByCondition = orderByNew;
-        break;
-      default:
-        sortByCondition = orderByNew;
-        break;
-    }
-
-    return sortByCondition;
-  }
-
-  async findLive(sortBy: string, page: number, itemsPerPage: number) {
+  async findLive(
+    sortBy: string,
+    page: number,
+    itemsPerPage: number,
+    category_id: number,
+  ) {
     const start = (page - 1) * itemsPerPage;
     const end = itemsPerPage;
 
+    const filter =
+      category_id === 0
+        ? { isComplete: false }
+        : { isComplete: false, auction_categoryId: category_id };
+
     return await this.prisma.auction.findMany({
-      where: { isComplete: false },
+      where: filter,
       include: {
         creator: true,
         item: { include: { item_type: true } },
         _count: { select: { bids: true } },
       },
-      orderBy: this.generateSortingObject(sortBy),
+      orderBy: AUCTION_SORT_KEY[sortBy],
       skip: start,
       take: end,
     });
@@ -88,6 +73,15 @@ export class AuctionService {
         cause: new Error(),
         description: 'Forbidden',
       });
+
+    if (item.item_type_id !== data.auction_categoryId)
+      throw new ForbiddenException(
+        'Auction category should match item category',
+        {
+          cause: new Error(),
+          description: 'Forbidden',
+        },
+      );
 
     const auction = await this.prisma.auction.findFirst({
       where: { AND: [{ item_id: data.item_id, isComplete: false }] },

@@ -9,6 +9,8 @@ const main = async () => {
   await prisma.$transaction([
     prisma.item_type.deleteMany(),
     prisma.item_type.createMany({ data: itemTypesData }),
+    prisma.auction_category.deleteMany(),
+    prisma.auction_category.createMany({ data: itemTypesData }),
   ]);
 };
 
