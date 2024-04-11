@@ -12,6 +12,7 @@ import CreateAuctionDto from './dtos/create-auction.dto';
 import { AuctionService } from './auction.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { User } from '../decorators/user.decorator';
+import { Public } from '../decorators/public.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('auction')
@@ -23,6 +24,7 @@ export class AuctionController {
     return this.auctionService.findMany(user.id);
   }
 
+  @Public()
   @Get('live')
   getLiveAuctions(
     @Query('sort') sortBy: string = 'newest',

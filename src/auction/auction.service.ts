@@ -44,8 +44,9 @@ export class AuctionService {
     return await this.prisma.auction.findMany({
       where: filter,
       include: {
-        creator: true,
-        item: { include: { item_type: true } },
+        auction_category: true,
+        creator: { select: { username: true, email: true } },
+        item: { select: { name: true, description: true } },
         _count: { select: { bids: true } },
       },
       orderBy: AUCTION_SORT_KEY[sortBy],
