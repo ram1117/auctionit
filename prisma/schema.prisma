@@ -20,6 +20,7 @@ model user_ {
   auctions            auction[]
   bids                bid[]
   notification_tokens notification_token[]
+  subscription        subscription[]
 }
 
 model item {
@@ -76,7 +77,7 @@ model notification {
   body                 String
   href                 String?
   createdAt            DateTime           @default(now())
-  active               Boolean            @default(true)
+  isRead               Boolean            @default(false)
 }
 
 model notification_token {
@@ -87,4 +88,12 @@ model notification_token {
   notification_token String         @unique
   active             Boolean        @default(true)
   notifications      notification[]
+}
+
+model subscription {
+  auction_id          String
+  user_id             String
+  user                user_   @relation(fields: [user_id], references: [id])
+  notificationEnabled Boolean @default(false)
+  @@id([user_id, auction_id])
 }

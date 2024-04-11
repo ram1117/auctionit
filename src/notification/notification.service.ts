@@ -3,12 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AcceptNotificationDto } from './dtos/acceptNotification.dto';
 import * as firebase from 'firebase-admin';
 import { ConfigService } from '@nestjs/config';
+import { SubscribeService } from '../subscribe/subscribe.service';
 
 @Injectable()
 export class NotificationService {
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
+    private subscribeService: SubscribeService,
   ) {
     const firebase_config = JSON.parse(
       this.configService.get('FIREBASE_CONFIG'),
@@ -35,6 +37,7 @@ export class NotificationService {
       })
     ).map((token) => token.notification_token);
 
+    this.subscribeService.createOrUpdate(userId, auction_id);
     return await firebase.messaging().subscribeToTopic(tokens, auction_id);
   }
   async unsubscribeTopic(userId: string, auction_id: string) {
@@ -44,6 +47,7 @@ export class NotificationService {
       })
     ).map((token) => token.notification_token);
 
+    this.subscribeService.update(userId, auction_id);
     return await firebase.messaging().unsubscribeFromTopic(tokens, auction_id);
   }
 
