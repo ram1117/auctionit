@@ -30,7 +30,7 @@ export class AuthController {
       sameSite: 'strict',
       httpOnly: true,
     });
-    return { message: 'Signin Successful' };
+    return { success: true, message: 'Signin Successful' };
   }
 
   @Post('signup')
@@ -42,6 +42,6 @@ export class AuthController {
   @Post('signout')
   signout(@Response({ passthrough: true }) res: any) {
     res.clearCookie('token');
-    return { message: 'signed out successfully' };
+    return { success: true, message: 'signed out successfully' };
   }
 }

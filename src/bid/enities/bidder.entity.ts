@@ -1,18 +1,18 @@
 import { Exclude } from 'class-transformer';
 
-class UserEntity {
-  constructor(partial: Partial<UserEntity>) {
-    Object.assign(this, partial);
-  }
-  id: string;
+export class BidderEntity {
   username: string;
   email: string;
   @Exclude()
+  fullname: string;
+  @Exclude()
   password: string;
+  @Exclude()
+  location: string;
+  @Exclude()
+  isVerified: boolean;
   @Exclude()
   role: string;
   @Exclude()
-  isVerified: boolean;
+  id: string;
 }
-
-export default UserEntity;

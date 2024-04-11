@@ -12,7 +12,7 @@ export class ItemService {
 
   async findOne(userid: string, id: string) {
     return await this.prisma.item.findFirstOrThrow({
-      where: { AND: [{ id }, { owner_id: userid }] },
+      where: { id, owner_id: userid },
     });
   }
 

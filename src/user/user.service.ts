@@ -14,13 +14,14 @@ export class UserService {
   }
 
   async findOneById(id: string) {
-    return this.prisma.user_.findUnique({ where: { id } });
+    const user = await this.prisma.user_.findUnique({ where: { id } });
+    return new UserEntity(user);
   }
 
   async create(data: CreateUserDto) {
     const { password, ...rest } = data;
     const hashedPwd = await bcrypt.hash(password, 10);
     await this.prisma.user_.create({ data: { ...rest, password: hashedPwd } });
-    return { message: 'User created successfully' };
+    return { success: true, message: 'User created successfully' };
   }
 }

@@ -60,6 +60,7 @@ export class BidController {
 
     this.notificationService.sendPush(response.auction_id, pushMessage);
     return {
+      success: true,
       message: 'Bid has been placed successfully',
     };
   }
