@@ -25,7 +25,10 @@ export class RolesGuard implements CanActivate {
       (role: string) => user.role === role,
     );
     if (!hasApproval)
-      throw new UnauthorizedException('no permission to perform this action');
+      throw new UnauthorizedException('no permission to perform this action', {
+        cause: new Error(),
+        description: 'UnAuthorized',
+      });
     return hasApproval;
   }
 }

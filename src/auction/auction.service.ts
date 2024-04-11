@@ -38,16 +38,19 @@ export class AuctionService {
       where: { AND: [{ id: data.item_id }, { owner_id: userId }] },
     });
     if (!item)
-      throw new ForbiddenException({
-        message: 'not authorized to create an auction for this item',
-      });
+      throw new ForbiddenException(
+        'not authorized to create an auction for this item',
+        { cause: new Error(), description: 'Forbidden' },
+      );
     if (item.isSold)
-      throw new ForbiddenException({
-        message: 'Item has already been sold',
+      throw new ForbiddenException('Item has already been sold', {
+        cause: new Error(),
+        description: 'Forbidden',
       });
     if (!item.isApproved)
-      throw new ForbiddenException({
-        message: 'Item has to be approved to be auctioned',
+      throw new ForbiddenException('Item has to be approved to be auctioned', {
+        cause: new Error(),
+        description: 'Forbidden',
       });
 
     const auction = await this.prisma.auction.findFirst({
@@ -55,8 +58,9 @@ export class AuctionService {
     });
 
     if (auction)
-      throw new ConflictException({
-        message: 'There is an ongoing auction for this item',
+      throw new ConflictException('There is an ongoing auction for this item', {
+        cause: new Error(),
+        description: 'Conflict',
       });
 
     return await this.prisma.auction.create({

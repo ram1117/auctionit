@@ -35,11 +35,17 @@ export class BidController {
   async createBid(@Body() data: CreateBidDto, @User() user: any) {
     const auction = await this.auctionService.findOne(data.auction_id);
     if (auction.deadline < new Date()) {
-      throw new ForbiddenException('Auction might have ended');
+      throw new ForbiddenException('Auction might have ended', {
+        cause: new Error(),
+        description: 'Forbidden',
+      });
     }
 
     if (auction.creater_id === user.id) {
-      throw new ForbiddenException('You cannot place your bid in this auction');
+      throw new ForbiddenException(
+        'You cannot place your bid in this auction',
+        { cause: new Error(), description: 'Forbidden' },
+      );
     }
     const response = await this.bidService.createOrUpdate(data, user.id);
     const payload = { value: response.price, username: user.username };
