@@ -26,10 +26,46 @@ export class AuctionService {
     });
   }
 
-  async findLive() {
+  private generateSortingObject(sortBy: string) {
+    const orderByNew = { createdAt: 'desc' } as const;
+    const orderByEndTime = { deadline: 'desc' } as const;
+    const orderByPopular = {
+      bids: { _count: 'desc' },
+    } as const;
+
+    let sortByCondition: any;
+    switch (sortBy) {
+      case 'popular':
+        sortByCondition = orderByPopular;
+        break;
+      case 'deadline':
+        sortByCondition = orderByEndTime;
+        break;
+      case 'newest':
+        sortByCondition = orderByNew;
+        break;
+      default:
+        sortByCondition = orderByNew;
+        break;
+    }
+
+    return sortByCondition;
+  }
+
+  async findLive(sortBy: string, page: number, itemsPerPage: number) {
+    const start = (page - 1) * itemsPerPage;
+    const end = itemsPerPage;
+
     return await this.prisma.auction.findMany({
       where: { isComplete: false },
-      include: { creator: true },
+      include: {
+        creator: true,
+        item: { include: { item_type: true } },
+        _count: { select: { bids: true } },
+      },
+      orderBy: this.generateSortingObject(sortBy),
+      skip: start,
+      take: end,
     });
   }
 

@@ -6,6 +6,7 @@ import {
   Param,
   Body,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import CreateAuctionDto from './dtos/create-auction.dto';
 import { AuctionService } from './auction.service';
@@ -23,8 +24,16 @@ export class AuctionController {
   }
 
   @Get('live')
-  getLiveAuctions() {
-    return this.auctionService.findLive();
+  getLiveAuctions(
+    @Query('sord') sortBy: string = 'newest',
+    @Query('page') pageNo: string = '1',
+    @Query('items') itemsPerPage: string = '50',
+  ) {
+    return this.auctionService.findLive(
+      sortBy,
+      parseInt(pageNo),
+      parseInt(itemsPerPage),
+    );
   }
 
   @Get(':id')

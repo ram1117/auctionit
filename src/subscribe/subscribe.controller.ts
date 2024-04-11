@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { SubscribeService } from './subscribe.service';
 import { User } from '../decorators/user.decorator';
@@ -10,8 +10,16 @@ export class SubscribeController {
   constructor(private subscriptionService: SubscribeService) {}
 
   @Get()
-  getAuctions(@User() user: any) {
-    return this.subscriptionService.findMany(user.id);
+  getAuctions(
+    @User() user: any,
+    @Query('page') pageNo: string = '1',
+    @Query('items') itemsPerPage: string = '50',
+  ) {
+    return this.subscriptionService.findMany(
+      user.id,
+      parseInt(pageNo),
+      parseInt(itemsPerPage),
+    );
   }
 
   @Post(':id')
