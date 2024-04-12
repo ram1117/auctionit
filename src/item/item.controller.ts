@@ -48,8 +48,7 @@ export class ItemController {
   ) {
     console.log(file);
     const imageUrl = await this.supabaseService.uploadImage(file, user.id);
-    console.log(imageUrl);
-    return this.itemService.create(data, user.id);
+    return this.itemService.create(data, imageUrl, user.id);
   }
 
   @Get(':id')

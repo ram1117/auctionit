@@ -29,6 +29,7 @@ model item {
   description    String
   isSold         Boolean   @default(false)
   isApproved     Boolean   @default(false)
+  imageUrl       String    @default("")
   owner_id       String
   owner          user_     @relation(fields: [owner_id], references: [id])
   item_type_id   Int

@@ -46,7 +46,7 @@ export class AuctionService {
       include: {
         auction_category: true,
         creator: { select: { username: true, email: true } },
-        item: { select: { name: true, description: true } },
+        item: { select: { name: true, description: true, imageUrl: true } },
         _count: { select: { bids: true } },
       },
       orderBy: AUCTION_SORT_KEY[sortBy],

@@ -16,9 +16,10 @@ export class ItemService {
     });
   }
 
-  async create(data: CreateItemDto, userId: string) {
-    const dataWithId = { ...data, owner_id: userId };
-    await this.prisma.item.create({ data: dataWithId });
+  async create(data: CreateItemDto, imageUrl: string, userId: string) {
+    await this.prisma.item.create({
+      data: { ...data, imageUrl, owner_id: userId },
+    });
     return { message: 'Item created successfully', success: true };
   }
 
