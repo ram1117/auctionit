@@ -35,4 +35,8 @@ export class ItemService {
       where: { isApproved: false },
     });
   }
+
+  async deleteOne(id: string) {
+    return await this.prisma.item.delete({ where: { id } });
+  }
 }

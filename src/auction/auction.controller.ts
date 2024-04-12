@@ -7,12 +7,15 @@ import {
   Body,
   UseGuards,
   Query,
+  Delete,
 } from '@nestjs/common';
 import CreateAuctionDto from './dtos/create-auction.dto';
 import { AuctionService } from './auction.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { User } from '../decorators/user.decorator';
 import { Public } from '../decorators/public.decorator';
+import { Roles, USER_ROLES } from '../decorators/roles.decorator.';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @UseGuards(JwtAuthGuard)
 @Controller('auction')
@@ -53,5 +56,12 @@ export class AuctionController {
   @Patch(':id')
   updateAuction(@Body() data: any, @Param('id') id: string) {
     return this.auctionService.updateOne(data, id);
+  }
+
+  @Roles(USER_ROLES.Admin)
+  @UseGuards(RolesGuard)
+  @Delete(':id')
+  deleteAuction(@Param() id: string) {
+    return this.auctionService.deleteOne(id);
   }
 }

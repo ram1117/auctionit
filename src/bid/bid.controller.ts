@@ -15,6 +15,8 @@ import { AuctionService } from '../auction/auction.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { User } from '../decorators/user.decorator';
 import { NotificationService } from '../notification/notification.service';
+import { Roles, USER_ROLES } from '../decorators/roles.decorator.';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @UseGuards(JwtAuthGuard)
 @Controller('bid')
@@ -65,6 +67,10 @@ export class BidController {
     };
   }
 
-  @Delete()
-  deleteBid() {}
+  @Roles(USER_ROLES.Admin)
+  @UseGuards(RolesGuard)
+  @Delete(':id')
+  deleteBid(@Param('id') id: string) {
+    this.bidService.deleteOne(id);
+  }
 }

@@ -10,6 +10,7 @@ import {
   UploadedFile,
   ParseFilePipeBuilder,
   HttpStatus,
+  Delete,
 } from '@nestjs/common';
 import { ItemService } from './item.service';
 import CreateItemDto from './dtos/CreateItem.dto';
@@ -46,7 +47,6 @@ export class ItemController {
     )
     file: Express.Multer.File,
   ) {
-    console.log(file);
     const imageUrl = await this.supabaseService.uploadImage(file, user.id);
     return this.itemService.create(data, imageUrl, user.id);
   }
@@ -73,5 +73,12 @@ export class ItemController {
   @Get('unapproved/all')
   getAllUnapprovedItems() {
     return this.itemService.findUnapproved();
+  }
+
+  @Roles(USER_ROLES.Admin)
+  @UseGuards(RolesGuard)
+  @Delete(':id')
+  deleteItem(@Param('id') id: string) {
+    return this.itemService.deleteOne(id);
   }
 }

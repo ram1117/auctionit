@@ -46,4 +46,8 @@ export class BidService {
 
     return new BidEntity(newbid);
   }
+
+  async deleteOne(id: string) {
+    return await this.prisma.bid.delete({ where: { id } });
+  }
 }

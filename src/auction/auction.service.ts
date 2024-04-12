@@ -103,6 +103,10 @@ export class AuctionService {
     return await this.prisma.auction.update({ where: { id }, data: data });
   }
 
+  async deleteOne(id: string) {
+    return await this.prisma.auction.delete({ where: { id } });
+  }
+
   @Interval(1000 * 60 * 10)
   async checkAuctionCompletion() {
     console.log(`checking ended auctions - ${new Date()}`);
