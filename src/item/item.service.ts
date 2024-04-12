@@ -12,14 +12,14 @@ export class ItemService {
 
   async findOne(userid: string, id: string) {
     return await this.prisma.item.findFirstOrThrow({
-      where: { AND: [{ id }, { owner_id: userid }] },
+      where: { id, owner_id: userid },
     });
   }
 
   async create(data: CreateItemDto, userId: string) {
     const dataWithId = { ...data, owner_id: userId };
     await this.prisma.item.create({ data: dataWithId });
-    return { message: 'Item created successfully' };
+    return { message: 'Item created successfully', success: true };
   }
 
   async updateApproval(id: string) {

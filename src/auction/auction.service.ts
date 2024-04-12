@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import CreateAuctionDto from './dtos/create-auction.dto';
 import { Interval } from '@nestjs/schedule';
 import { NotificationService } from '../notification/notification.service';
+import { AUCTION_SORT_KEY } from '../constants/auctionSort';
 
 @Injectable()
 export class AuctionService {
@@ -26,10 +27,31 @@ export class AuctionService {
     });
   }
 
-  async findLive() {
+  async findLive(
+    sortBy: string,
+    page: number,
+    itemsPerPage: number,
+    category_id: number,
+  ) {
+    const start = (page - 1) * itemsPerPage;
+    const end = itemsPerPage;
+
+    const filter =
+      category_id === 0
+        ? { isComplete: false }
+        : { isComplete: false, auction_categoryId: category_id };
+
     return await this.prisma.auction.findMany({
-      where: { isComplete: false },
-      include: { creator: true },
+      where: filter,
+      include: {
+        auction_category: true,
+        creator: { select: { username: true, email: true } },
+        item: { select: { name: true, description: true } },
+        _count: { select: { bids: true } },
+      },
+      orderBy: AUCTION_SORT_KEY[sortBy],
+      skip: start,
+      take: end,
     });
   }
 
@@ -38,25 +60,38 @@ export class AuctionService {
       where: { AND: [{ id: data.item_id }, { owner_id: userId }] },
     });
     if (!item)
-      throw new ForbiddenException({
-        message: 'not authorized to create an auction for this item',
-      });
+      throw new ForbiddenException(
+        'not authorized to create an auction for this item',
+        { cause: new Error(), description: 'Forbidden' },
+      );
     if (item.isSold)
-      throw new ForbiddenException({
-        message: 'Item has already been sold',
+      throw new ForbiddenException('Item has already been sold', {
+        cause: new Error(),
+        description: 'Forbidden',
       });
     if (!item.isApproved)
-      throw new ForbiddenException({
-        message: 'Item has to be approved to be auctioned',
+      throw new ForbiddenException('Item has to be approved to be auctioned', {
+        cause: new Error(),
+        description: 'Forbidden',
       });
+
+    if (item.item_type_id !== data.auction_categoryId)
+      throw new ForbiddenException(
+        'Auction category should match item category',
+        {
+          cause: new Error(),
+          description: 'Forbidden',
+        },
+      );
 
     const auction = await this.prisma.auction.findFirst({
       where: { AND: [{ item_id: data.item_id, isComplete: false }] },
     });
 
     if (auction)
-      throw new ConflictException({
-        message: 'There is an ongoing auction for this item',
+      throw new ConflictException('There is an ongoing auction for this item', {
+        cause: new Error(),
+        description: 'Conflict',
       });
 
     return await this.prisma.auction.create({
