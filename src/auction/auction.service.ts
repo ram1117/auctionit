@@ -46,7 +46,7 @@ export class AuctionService {
       include: {
         auction_category: true,
         creator: { select: { username: true, email: true } },
-        item: { select: { name: true, description: true } },
+        item: { select: { name: true, description: true, imageUrl: true } },
         _count: { select: { bids: true } },
       },
       orderBy: AUCTION_SORT_KEY[sortBy],
@@ -101,6 +101,10 @@ export class AuctionService {
 
   async updateOne(data: any, id: string) {
     return await this.prisma.auction.update({ where: { id }, data: data });
+  }
+
+  async deleteOne(id: string) {
+    return await this.prisma.auction.delete({ where: { id } });
   }
 
   @Interval(1000 * 60 * 10)
