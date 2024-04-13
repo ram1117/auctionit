@@ -20,6 +20,7 @@ import { Roles, USER_ROLES } from '../decorators/roles.decorator.';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SupabaseService } from '../supabase/supabase.service';
+import { Public } from '../decorators/public.decorator';
 
 @Controller('item')
 @UseGuards(JwtAuthGuard)
@@ -32,6 +33,12 @@ export class ItemController {
   @Get()
   allItems(@User() user: any) {
     return this.itemService.findManyByUser(user.id);
+  }
+
+  @Public()
+  @Get('itemtypes')
+  getItemTypes() {
+    return this.itemService.findManyTypes();
   }
 
   @Post()

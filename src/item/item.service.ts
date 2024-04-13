@@ -16,6 +16,10 @@ export class ItemService {
     });
   }
 
+  async findManyTypes() {
+    return await this.prisma.item_type.findMany();
+  }
+
   async create(data: CreateItemDto, imageUrl: string, userId: string) {
     await this.prisma.item.create({
       data: { ...data, imageUrl, owner_id: userId },

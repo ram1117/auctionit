@@ -43,6 +43,7 @@ model item_type {
   id          Int     @id @default(autoincrement())
   type        String
   description String?
+  iconUrl     String?
   items       item[]
 }
 
@@ -50,6 +51,7 @@ model auction_category {
   id          Int       @id @default(autoincrement())
   type        String
   description String?
+  iconUrl     String?
   auctions    auction[]
 }
 
