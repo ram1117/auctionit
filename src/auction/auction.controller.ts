@@ -18,7 +18,7 @@ import { Roles, USER_ROLES } from '../decorators/roles.decorator.';
 import { RolesGuard } from '../auth/guards/roles.guard';
 
 @UseGuards(JwtAuthGuard)
-@Controller('auction')
+@Controller('auctions')
 export class AuctionController {
   constructor(private auctionService: AuctionService) {}
 
@@ -30,7 +30,7 @@ export class AuctionController {
   @Public()
   @Get('live')
   getLiveAuctions(
-    @Query('sort') sortBy: string = 'newest',
+    @Query('sortby') sortBy: string = 'newest',
     @Query('page') pageNo: string = '1',
     @Query('items') itemsPerPage: string = '50',
     @Query('category') category_id: string = '0',
@@ -43,7 +43,8 @@ export class AuctionController {
     );
   }
 
-  @Get(':id')
+  @Public()
+  @Get('auction/:id')
   getAuction(@Param('id') id: string) {
     return this.auctionService.findOne(id);
   }

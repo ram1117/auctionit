@@ -17,7 +17,17 @@ export class AuctionService {
   ) {}
 
   async findOne(id: string) {
-    return await this.prisma.auction.findUniqueOrThrow({ where: { id } });
+    return await this.prisma.auction.findFirst({
+      where: { id },
+      include: {
+        item: true,
+        bids: {
+          orderBy: { price: 'desc' },
+          take: 1,
+          include: { bidder: { select: { username: true } } },
+        },
+      },
+    });
   }
 
   async findMany(userId: string) {
@@ -43,13 +53,17 @@ export class AuctionService {
 
     return await this.prisma.auction.findMany({
       where: filter,
+      orderBy: AUCTION_SORT_KEY[sortBy],
       include: {
         auction_category: true,
         creator: { select: { username: true, email: true } },
         item: { select: { name: true, description: true, imageUrl: true } },
         _count: { select: { bids: true } },
+        bids: {
+          orderBy: { price: 'desc' },
+          take: 1,
+        },
       },
-      orderBy: AUCTION_SORT_KEY[sortBy],
       skip: start,
       take: end,
     });
@@ -107,10 +121,10 @@ export class AuctionService {
     return await this.prisma.auction.delete({ where: { id } });
   }
 
-  @Interval(1000 * 60 * 10)
+  @Interval(1000 * 60 * 5)
   async checkAuctionCompletion() {
     console.log(`checking ended auctions - ${new Date()}`);
-    const lastTenMinutes = new Date(Date.now() - 1000 * 60 * 11);
+    const lastTenMinutes = new Date(Date.now() - 1000 * 60 * 6);
     const auctions = await this.prisma.auction.findMany({
       where: {
         deadline: { gte: lastTenMinutes, lte: new Date() },

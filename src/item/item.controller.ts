@@ -22,7 +22,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { SupabaseService } from '../supabase/supabase.service';
 import { Public } from '../decorators/public.decorator';
 
-@Controller('item')
+@Controller('items')
 @UseGuards(JwtAuthGuard)
 export class ItemController {
   constructor(
@@ -36,7 +36,7 @@ export class ItemController {
   }
 
   @Public()
-  @Get('itemtypes')
+  @Get('types')
   getItemTypes() {
     return this.itemService.findManyTypes();
   }
@@ -50,15 +50,21 @@ export class ItemController {
       new ParseFilePipeBuilder()
         .addMaxSizeValidator({ maxSize: 100000 })
         .addFileTypeValidator({ fileType: '.(png|jpeg|jpg)' })
-        .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
+        .build({
+          fileIsRequired: false,
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
     )
     file: Express.Multer.File,
   ) {
-    const imageUrl = await this.supabaseService.uploadImage(file, user.id);
+    let imageUrl = '';
+    if (file) {
+      imageUrl = await this.supabaseService.uploadImage(file, user.id);
+    }
     return this.itemService.create(data, imageUrl, user.id);
   }
 
-  @Get(':id')
+  @Get('item/:id')
   getItemById(@User() user: any, @Param('id') id: string) {
     return this.itemService.findOne(user.id, id);
   }
@@ -70,6 +76,18 @@ export class ItemController {
     const item = await this.itemService.updateApproval(id);
 
     if (!item) {
+      return { error: true, message: 'Error approving the item' };
+    }
+    return { success: true, message: 'Item approved for auction' };
+  }
+
+  @Roles(USER_ROLES.Admin)
+  @UseGuards(RolesGuard)
+  @Patch('approveall')
+  async approveManyItems() {
+    const items = await this.itemService.updateMany();
+
+    if (!items) {
       return { error: true, message: 'Error approving the item' };
     }
     return { success: true, message: 'Item approved for auction' };

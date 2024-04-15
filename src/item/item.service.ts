@@ -7,7 +7,10 @@ export class ItemService {
   constructor(private prisma: PrismaService) {}
 
   async findManyByUser(userid: string) {
-    return await this.prisma.item.findMany({ where: { owner_id: userid } });
+    return await this.prisma.item.findMany({
+      where: { owner_id: userid },
+      select: { id: true, item_type_id: true },
+    });
   }
 
   async findOne(userid: string, id: string) {
@@ -30,6 +33,13 @@ export class ItemService {
   async updateApproval(id: string) {
     return await this.prisma.item.update({
       where: { id },
+      data: { isApproved: true },
+    });
+  }
+
+  async updateMany() {
+    return await this.prisma.item.updateMany({
+      where: { isApproved: false },
       data: { isApproved: true },
     });
   }

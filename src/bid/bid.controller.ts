@@ -50,13 +50,13 @@ export class BidController {
       );
     }
     const response = await this.bidService.createOrUpdate(data, user.id);
-    const payload = { value: response.price, username: user.username };
+    const payload = { price: response.price, username: user.username };
 
     this.auctionGateway.placeBidInRoom(response.auction_id, payload);
 
     const pushMessage = {
       title: 'New Bid Alert',
-      data: `${payload.value} by ${payload.username}`,
+      data: `${payload.price} by ${payload.username}`,
       href: `/auction/${response.auction_id}`,
     };
 

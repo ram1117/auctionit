@@ -4,7 +4,7 @@ import { IsString, MinLength, MaxLength, IsNumber } from 'class-validator';
 class CreateItemDto {
   @IsString()
   @MinLength(3)
-  @MaxLength(26)
+  @MaxLength(60)
   name: string;
 
   @IsString()
