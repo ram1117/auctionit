@@ -5,13 +5,9 @@ import { PrismaService } from '../prisma/prisma.service';
 export class SubscribeService {
   constructor(private prisma: PrismaService) {}
 
-  async findMany(userId: string, page: number, itemsPerPage: number) {
-    const start = (page - 1) * itemsPerPage;
-
+  async findMany(userId: string) {
     return await this.prisma.subscription.findMany({
       where: { user_id: userId },
-      skip: start,
-      take: itemsPerPage,
     });
   }
 

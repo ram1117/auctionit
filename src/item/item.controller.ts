@@ -23,7 +23,8 @@ import { SupabaseService } from '../supabase/supabase.service';
 import { Public } from '../decorators/public.decorator';
 
 @Controller('items')
-@UseGuards(JwtAuthGuard)
+@Roles(USER_ROLES.Admin)
+@UseGuards(RolesGuard, JwtAuthGuard)
 export class ItemController {
   constructor(
     private itemService: ItemService,
@@ -69,8 +70,6 @@ export class ItemController {
     return this.itemService.findOne(user.id, id);
   }
 
-  @Roles(USER_ROLES.Admin)
-  @UseGuards(RolesGuard)
   @Patch('approve/:id')
   async approveItem(@Param('id') id: string) {
     const item = await this.itemService.updateApproval(id);
@@ -81,8 +80,6 @@ export class ItemController {
     return { success: true, message: 'Item approved for auction' };
   }
 
-  @Roles(USER_ROLES.Admin)
-  @UseGuards(RolesGuard)
   @Patch('approveall')
   async approveManyItems() {
     const items = await this.itemService.updateMany();
@@ -93,15 +90,11 @@ export class ItemController {
     return { success: true, message: 'Item approved for auction' };
   }
 
-  @Roles(USER_ROLES.Admin)
-  @UseGuards(RolesGuard)
   @Get('unapproved/all')
   getAllUnapprovedItems() {
     return this.itemService.findUnapproved();
   }
 
-  @Roles(USER_ROLES.Admin)
-  @UseGuards(RolesGuard)
   @Delete(':id')
   deleteItem(@Param('id') id: string) {
     return this.itemService.deleteOne(id);

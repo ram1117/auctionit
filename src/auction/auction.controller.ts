@@ -22,6 +22,8 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 export class AuctionController {
   constructor(private auctionService: AuctionService) {}
 
+  @Roles(USER_ROLES.Admin)
+  @UseGuards(RolesGuard)
   @Get('user')
   getAuctions(@User() user: any) {
     return this.auctionService.findMany(user.id);
@@ -49,11 +51,15 @@ export class AuctionController {
     return this.auctionService.findOne(id);
   }
 
+  @Roles(USER_ROLES.Admin)
+  @UseGuards(RolesGuard)
   @Post()
   async createAuction(@Body() data: CreateAuctionDto, @User() user: any) {
     return this.auctionService.createOne(data, user.id);
   }
 
+  @Roles(USER_ROLES.Admin)
+  @UseGuards(RolesGuard)
   @Patch(':id')
   updateAuction(@Body() data: any, @Param('id') id: string) {
     return this.auctionService.updateOne(data, id);
