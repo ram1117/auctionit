@@ -8,6 +8,11 @@ import * as bcrypt from 'bcrypt';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
+  async findOneEmail(email: string) {
+    const user = await this.prisma.user_.findUnique({ where: { email } });
+    return new UserEntity(user);
+  }
+
   async findOne(username: string) {
     const user = await this.prisma.user_.findUnique({ where: { username } });
     return new UserEntity(user);
