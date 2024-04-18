@@ -37,7 +37,9 @@ export class NotificationService {
       })
     ).map((token) => token.notification_token);
 
-    this.subscribeService.createOrUpdate(userId, auction_id);
+    this.subscribeService.createOrUpdate(userId, auction_id, {
+      notificationEnabled: true,
+    });
     return await firebase.messaging().subscribeToTopic(tokens, auction_id);
   }
   async unsubscribeTopic(userId: string, auction_id: string) {

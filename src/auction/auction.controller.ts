@@ -12,7 +12,6 @@ import {
 import CreateAuctionDto from './dtos/create-auction.dto';
 import { AuctionService } from './auction.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { User } from '../decorators/user.decorator';
 import { Public } from '../decorators/public.decorator';
 import { Roles, USER_ROLES } from '../decorators/roles.decorator.';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -22,11 +21,6 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 @Controller('auctions')
 export class AuctionController {
   constructor(private auctionService: AuctionService) {}
-
-  @Get('user')
-  getAuctions(@User() user: any) {
-    return this.auctionService.findMany(user.id);
-  }
 
   @Public()
   @Get('live')
@@ -44,15 +38,15 @@ export class AuctionController {
     );
   }
 
-  @Public()
+  @Roles(USER_ROLES.User)
   @Get('auction/:id')
   getAuction(@Param('id') id: string) {
     return this.auctionService.findOne(id);
   }
 
   @Post()
-  async createAuction(@Body() data: CreateAuctionDto, @User() user: any) {
-    return this.auctionService.createOne(data, user.id);
+  async createAuction(@Body() data: CreateAuctionDto) {
+    return this.auctionService.createOne(data);
   }
 
   @Patch(':id')

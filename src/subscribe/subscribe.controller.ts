@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { SubscribeService } from './subscribe.service';
 import { User } from '../decorators/user.decorator';
@@ -13,9 +13,20 @@ export class SubscribeController {
     return this.subscriptionService.findMany(user.id);
   }
 
+  @Get(':id')
+  getAuction(@Param('id') id: string, @User() user: any) {
+    return this.subscriptionService.findOne(id, user.id);
+  }
+
   @Post(':id')
-  subscribeToAuction(@Param('id') auction_id: string, @User() user: any) {
-    return this.subscriptionService.create(user.id, auction_id);
+  subscribeToAuction(
+    @Param('id') auction_id: string,
+    @Query('enabled') enabled: string,
+    @User() user: any,
+  ) {
+    return this.subscriptionService.createOrUpdate(user.id, auction_id, {
+      notificationEnabled: enabled === 'true',
+    });
   }
 
   @Post('/unsubscribe/:id')
