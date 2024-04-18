@@ -5,7 +5,6 @@ import {
   Param,
   Body,
   UseGuards,
-  Patch,
   UseInterceptors,
   UploadedFile,
   ParseFilePipeBuilder,
@@ -24,17 +23,12 @@ import { Public } from '../decorators/public.decorator';
 
 @Controller('items')
 @Roles(USER_ROLES.Admin)
-@UseGuards(RolesGuard, JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ItemController {
   constructor(
     private itemService: ItemService,
     private supabaseService: SupabaseService,
   ) {}
-
-  @Get()
-  allItems(@User() user: any) {
-    return this.itemService.findManyByUser(user.id);
-  }
 
   @Public()
   @Get('types')
@@ -62,37 +56,12 @@ export class ItemController {
     if (file) {
       imageUrl = await this.supabaseService.uploadImage(file, user.id);
     }
-    return this.itemService.create(data, imageUrl, user.id);
+    return this.itemService.create(data, imageUrl);
   }
 
   @Get('item/:id')
   getItemById(@User() user: any, @Param('id') id: string) {
     return this.itemService.findOne(user.id, id);
-  }
-
-  @Patch('approve/:id')
-  async approveItem(@Param('id') id: string) {
-    const item = await this.itemService.updateApproval(id);
-
-    if (!item) {
-      return { error: true, message: 'Error approving the item' };
-    }
-    return { success: true, message: 'Item approved for auction' };
-  }
-
-  @Patch('approveall')
-  async approveManyItems() {
-    const items = await this.itemService.updateMany();
-
-    if (!items) {
-      return { error: true, message: 'Error approving the item' };
-    }
-    return { success: true, message: 'Item approved for auction' };
-  }
-
-  @Get('unapproved/all')
-  getAllUnapprovedItems() {
-    return this.itemService.findUnapproved();
   }
 
   @Delete(':id')

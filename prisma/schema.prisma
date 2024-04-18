@@ -14,29 +14,26 @@ model user_ {
   username            String               @unique
   password            String
   location            String
-  isVerified          Boolean              @default(false)
   role                String               @default("user")
   items               item[]
-  auctions            auction[]
   bids                bid[]
   notification_tokens notification_token[]
   subscription        subscription[]
+  auction             auction[]
 }
 
 model item {
-  id             String    @id @default(uuid())
-  name           String
-  description    String
-  isSold         Boolean   @default(false)
-  isApproved     Boolean   @default(false)
-  imageUrl       String    @default("")
-  owner_id       String
-  owner          user_     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
-  item_type_id   Int
-  item_type      item_type @relation(fields: [item_type_id], references: [id])
-  auctions       auction[]
-  winning_bid_id String?   @unique
-  winning_bid    bid?      @relation(fields: [winning_bid_id], references: [id])
+  id           String    @id @default(uuid())
+  name         String
+  description  String
+  isSold       Boolean   @default(false)
+  imageUrl     String    @default("")
+  item_type_id Int
+  item_type    item_type @relation(fields: [item_type_id], references: [id])
+  auctions     auction[]
+  winner_id    String?
+  winnder      user_?    @relation(fields: [winner_id], references: [id])
+  bid          bid[]
 }
 
 model item_type {
@@ -59,15 +56,16 @@ model auction {
   id                 String           @id @default(uuid())
   item_id            String
   item               item             @relation(fields: [item_id], references: [id], onDelete: Cascade)
-  deadline           DateTime         @default(dbgenerated("NOW() + interval '24 hours'"))
+  deadline           DateTime         @default(dbgenerated("NOW() + interval '48 hours'"))
   isComplete         Boolean          @default(false)
   createdAt          DateTime         @default(now())
   start_value        Float            @default(0.00)
-  creater_id         String
-  creator            user_            @relation(fields: [creater_id], references: [id], onDelete: Cascade)
   bids               bid[]
   auction_category   auction_category @relation(fields: [auction_categoryId], references: [id])
   auction_categoryId Int
+  subscription       subscription[]
+  user_              user_?           @relation(fields: [user_Id], references: [id])
+  user_Id            String?
 }
 
 model bid {
@@ -78,7 +76,8 @@ model bid {
   bidder     user_    @relation(fields: [bidder_id], references: [id], onDelete: Cascade)
   price      Float    @default(0.00)
   bid_time   DateTime @default(now())
-  item       item?
+  item       item?    @relation(fields: [itemId], references: [id])
+  itemId     String?
 }
 
 model notification {
@@ -104,6 +103,7 @@ model notification_token {
 
 model subscription {
   auction_id          String
+  auction             auction @relation(fields: [auction_id], references: [id], onDelete: Cascade)
   user_id             String
   user                user_   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   notificationEnabled Boolean @default(false)

@@ -30,9 +30,8 @@ export class AuctionService {
     });
   }
 
-  async findMany(userId: string) {
+  async findMany() {
     return await this.prisma.auction.findMany({
-      where: { creater_id: userId },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -56,7 +55,6 @@ export class AuctionService {
       orderBy: AUCTION_SORT_KEY[sortBy],
       include: {
         auction_category: true,
-        creator: { select: { username: true, email: true } },
         item: { select: { name: true, description: true, imageUrl: true } },
         _count: { select: { bids: true } },
         bids: {
@@ -69,9 +67,9 @@ export class AuctionService {
     });
   }
 
-  async createOne(data: CreateAuctionDto, userId: string) {
+  async createOne(data: CreateAuctionDto) {
     const item = await this.prisma.item.findFirst({
-      where: { AND: [{ id: data.item_id }, { owner_id: userId }] },
+      where: { AND: [{ id: data.item_id }] },
     });
     if (!item)
       throw new ForbiddenException(
@@ -80,11 +78,6 @@ export class AuctionService {
       );
     if (item.isSold)
       throw new ForbiddenException('Item has already been sold', {
-        cause: new Error(),
-        description: 'Forbidden',
-      });
-    if (!item.isApproved)
-      throw new ForbiddenException('Item has to be approved to be auctioned', {
         cause: new Error(),
         description: 'Forbidden',
       });
@@ -109,7 +102,7 @@ export class AuctionService {
       });
 
     return await this.prisma.auction.create({
-      data: { ...data, creater_id: userId },
+      data: { ...data },
     });
   }
 
@@ -138,7 +131,7 @@ export class AuctionService {
         const topBid = auction.bids[0];
         await this.prisma.item.update({
           where: { id: auction.item_id },
-          data: { isSold: true, winning_bid_id: topBid.id },
+          data: { isSold: true, winner_id: topBid.bidder_id },
         });
       }
       await this.prisma.auction.update({

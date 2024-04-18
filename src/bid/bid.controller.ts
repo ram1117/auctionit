@@ -7,6 +7,7 @@ import {
   Delete,
   ForbiddenException,
   UseGuards,
+  NotFoundException,
 } from '@nestjs/common';
 import { BidService } from './bid.service';
 import CreateBidDto from './dtos/createBid.dto';
@@ -36,6 +37,11 @@ export class BidController {
   @Post()
   async createBid(@Body() data: CreateBidDto, @User() user: any) {
     const auction = await this.auctionService.findOne(data.auction_id);
+    if (!auction)
+      throw new NotFoundException({
+        message: 'Auction not found',
+        error: 'NotFound',
+      });
     if (auction.deadline < new Date()) {
       throw new ForbiddenException('Auction might have ended', {
         cause: new Error(),
@@ -43,7 +49,7 @@ export class BidController {
       });
     }
 
-    if (auction.creater_id === user.id) {
+    if (user.role === USER_ROLES.Admin) {
       throw new ForbiddenException(
         'You cannot place your bid in this auction',
         { cause: new Error(), description: 'Forbidden' },
@@ -51,7 +57,6 @@ export class BidController {
     }
     const response = await this.bidService.createOrUpdate(data, user.id);
     const payload = { price: response.price, username: user.username };
-
     this.auctionGateway.placeBidInRoom(response.auction_id, payload);
 
     const pushMessage = {

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../../decorators/roles.decorator.';
+import { IS_PUBLIC_KEY } from '../../decorators/public.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -17,12 +18,18 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
+    const isPublic = this.reflector.getAllAndOverride(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
     if (!requiredRoles) return true;
+    if (isPublic) return true;
 
     const { user } = context.switchToHttp().getRequest();
 
     const hasApproval = requiredRoles.some(
-      (role: string) => user.role === role,
+      (role: string[]) => user.role === role,
     );
     if (!hasApproval)
       throw new UnauthorizedException('no permission to perform this action', {

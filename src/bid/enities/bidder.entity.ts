@@ -10,8 +10,6 @@ export class BidderEntity {
   @Exclude()
   location: string;
   @Exclude()
-  isVerified: boolean;
-  @Exclude()
   role: string;
   @Exclude()
   id: string;
