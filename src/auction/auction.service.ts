@@ -131,7 +131,11 @@ export class AuctionService {
         const topBid = auction.bids[0];
         await this.prisma.item.update({
           where: { id: auction.item_id },
-          data: { isSold: true, winner_id: topBid.bidder_id },
+          data: {
+            isSold: true,
+            winner_id: topBid.bidder_id,
+            final_price: topBid.price,
+          },
         });
       }
       await this.prisma.auction.update({

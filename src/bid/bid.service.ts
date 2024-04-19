@@ -4,7 +4,6 @@ import CreateBidDto from './dtos/createBid.dto';
 import { SubscribeService } from '../subscribe/subscribe.service';
 import { BidEntity } from './enities/bid.entity';
 import { NotificationService } from '../notification/notification.service';
-import { AuctionGateway } from '../gateways/auction.gateway';
 
 @Injectable()
 export class BidService {
@@ -12,8 +11,14 @@ export class BidService {
     private prisma: PrismaService,
     private subscribeService: SubscribeService,
     private notificationService: NotificationService,
-    private auctionGateway: AuctionGateway,
   ) {}
+
+  async findMany(userId: string) {
+    return await this.prisma.bid.findMany({
+      where: { bidder_id: userId },
+      include: { auction: { include: { item: true } } },
+    });
+  }
 
   async findOne(id: string) {
     const bid = await this.prisma.bid.findFirst({

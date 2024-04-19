@@ -31,7 +31,8 @@ model item {
   item_type    item_type @relation(fields: [item_type_id], references: [id])
   auctions     auction[]
   winner_id    String?
-  winnder      user_?    @relation(fields: [winner_id], references: [id])
+  winner       user_?    @relation(fields: [winner_id], references: [id])
+  final_price  Decimal?
   bid          bid[]
 }
 

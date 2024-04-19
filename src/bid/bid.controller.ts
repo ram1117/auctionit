@@ -15,7 +15,6 @@ import { AuctionGateway } from '../gateways/auction.gateway';
 import { AuctionService } from '../auction/auction.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { User } from '../decorators/user.decorator';
-import { NotificationService } from '../notification/notification.service';
 import { Roles, USER_ROLES } from '../decorators/roles.decorator.';
 import { RolesGuard } from '../auth/guards/roles.guard';
 
@@ -26,8 +25,12 @@ export class BidController {
     private bidService: BidService,
     private auctionService: AuctionService,
     private auctionGateway: AuctionGateway,
-    private notificationService: NotificationService,
   ) {}
+
+  @Get('user/all')
+  getUserBids(@User() user: any) {
+    return this.bidService.findMany(user.id);
+  }
 
   @Get(':auctionId')
   getTopBid(@Param('auctionId') auctionId: string) {

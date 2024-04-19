@@ -13,7 +13,9 @@ export class ItemService {
   }
 
   async findManyByUser(id: string) {
-    return await this.prisma.item.findMany({ where: { winner_id: id } });
+    return await this.prisma.item.findMany({
+      where: { winner_id: id },
+    });
   }
 
   async findManyTypes() {

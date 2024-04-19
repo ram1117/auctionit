@@ -20,7 +20,14 @@ export class NotificationService {
     });
   }
 
-  async acceptPushNotification(userId: string, data: AcceptNotificationDto) {
+  async findManyTokens(userId: string) {
+    const tokens = await this.prisma.notification_token.findMany({
+      where: { user_id: userId },
+    });
+    return tokens.map((token) => token.notification_token);
+  }
+
+  async addToken(userId: string, data: AcceptNotificationDto) {
     const token = await this.prisma.notification_token.findFirst({
       where: { notification_token: data.notification_token },
     });
@@ -28,6 +35,8 @@ export class NotificationService {
       return await this.prisma.notification_token.create({
         data: { ...data, user_id: userId },
       });
+
+    return { message: 'token already exists' };
   }
 
   async subscribeTopic(userId: string, auction_id: string) {
@@ -40,7 +49,10 @@ export class NotificationService {
     this.subscribeService.createOrUpdate(userId, auction_id, {
       notificationEnabled: true,
     });
-    return await firebase.messaging().subscribeToTopic(tokens, auction_id);
+
+    if (tokens.length !== 0)
+      await firebase.messaging().subscribeToTopic(tokens, auction_id);
+    return { success: true, message: 'Subscribed' };
   }
   async unsubscribeTopic(userId: string, auction_id: string) {
     const tokens = (
@@ -49,8 +61,12 @@ export class NotificationService {
       })
     ).map((token) => token.notification_token);
 
-    this.subscribeService.update(userId, auction_id);
-    return await firebase.messaging().unsubscribeFromTopic(tokens, auction_id);
+    this.subscribeService.createOrUpdate(userId, auction_id, {
+      notificationEnabled: false,
+    });
+    if (tokens.length !== 0)
+      await firebase.messaging().unsubscribeFromTopic(tokens, auction_id);
+    return { success: true, message: 'Unsubscribed' };
   }
 
   async disablePushNotification(token_id: string) {
@@ -61,7 +77,6 @@ export class NotificationService {
 
   async sendPush(auction_id: string, notificationData: any) {
     console.log('sending push message ', new Date());
-    console.log(auction_id);
     await firebase
       .messaging()
       .send({

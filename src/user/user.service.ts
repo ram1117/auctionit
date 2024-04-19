@@ -23,7 +23,10 @@ export class UserService {
   }
 
   async findOneById(id: string) {
-    const user = await this.prisma.user_.findUnique({ where: { id } });
+    const user = await this.prisma.user_.findUnique({
+      where: { id },
+      include: { subscription: true },
+    });
     return new UserEntity(user);
   }
 
