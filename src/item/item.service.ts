@@ -6,10 +6,14 @@ import CreateItemDto from './dtos/CreateItem.dto';
 export class ItemService {
   constructor(private prisma: PrismaService) {}
 
-  async findOne(userid: string, id: string) {
+  async findOne(id: string) {
     return await this.prisma.item.findFirstOrThrow({
       where: { id },
     });
+  }
+
+  async findManyByUser(id: string) {
+    return await this.prisma.item.findMany({ where: { winner_id: id } });
   }
 
   async findManyTypes() {

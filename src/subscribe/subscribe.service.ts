@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -6,14 +6,28 @@ export class SubscribeService {
   constructor(private prisma: PrismaService) {}
 
   async findOne(id: string, userId: string) {
-    return await this.prisma.subscription.findFirst({
+    const subscription = await this.prisma.subscription.findFirst({
       where: { auction_id: id, user_id: userId },
     });
+    if (!subscription)
+      throw new NotFoundException({
+        error: 'NotFound',
+        message: 'Item Not found',
+      });
+    return subscription;
   }
 
   async findMany(userId: string) {
     return await this.prisma.subscription.findMany({
       where: { user_id: userId },
+      orderBy: { auction: { deadline: 'desc' } },
+      include: {
+        auction: {
+          include: {
+            item: { select: { id: true, name: true, imageUrl: true } },
+          },
+        },
+      },
     });
   }
 

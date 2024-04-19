@@ -49,23 +49,31 @@ export class BidController {
       });
     }
 
+    if (data.price < auction.start_value) {
+      throw new ForbiddenException(
+        'Bid price should be greater than start price',
+        {
+          cause: new Error(),
+          description: 'Forbidden',
+        },
+      );
+    }
+
     if (user.role === USER_ROLES.Admin) {
       throw new ForbiddenException(
         'You cannot place your bid in this auction',
         { cause: new Error(), description: 'Forbidden' },
       );
     }
-    const response = await this.bidService.createOrUpdate(data, user.id);
-    const payload = { price: response.price, username: user.username };
-    this.auctionGateway.placeBidInRoom(response.auction_id, payload);
+    const newbid = await this.bidService.createOrUpdate(
+      data,
+      user.id,
+      user.username,
+    );
 
-    const pushMessage = {
-      title: 'New Bid Alert',
-      data: `${payload.price} by ${payload.username}`,
-      href: `/auction/${response.auction_id}`,
-    };
+    const payload = { price: newbid.price, username: user.username };
+    this.auctionGateway.placeBidInRoom(newbid.auction_id, payload);
 
-    this.notificationService.sendPush(response.auction_id, pushMessage);
     return {
       success: true,
       message: 'Bid has been placed successfully',

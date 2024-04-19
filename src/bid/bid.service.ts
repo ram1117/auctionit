@@ -3,12 +3,16 @@ import { PrismaService } from '../prisma/prisma.service';
 import CreateBidDto from './dtos/createBid.dto';
 import { SubscribeService } from '../subscribe/subscribe.service';
 import { BidEntity } from './enities/bid.entity';
+import { NotificationService } from '../notification/notification.service';
+import { AuctionGateway } from '../gateways/auction.gateway';
 
 @Injectable()
 export class BidService {
   constructor(
     private prisma: PrismaService,
     private subscribeService: SubscribeService,
+    private notificationService: NotificationService,
+    private auctionGateway: AuctionGateway,
   ) {}
 
   async findOne(id: string) {
@@ -20,7 +24,7 @@ export class BidService {
     return new BidEntity(bid);
   }
 
-  async createOrUpdate(data: CreateBidDto, userId: string) {
+  async createOrUpdate(data: CreateBidDto, userId: string, username: string) {
     const bid = await this.prisma.bid.findFirst({
       where: {
         AND: { bidder_id: userId, auction_id: data.auction_id },
@@ -29,7 +33,9 @@ export class BidService {
 
     let newbid: any;
     if (!bid) {
-      await this.subscribeService.create(userId, data.auction_id);
+      await this.subscribeService.createOrUpdate(userId, data.auction_id, {
+        notificationEnabled: false,
+      });
 
       newbid = await this.prisma.bid.create({
         data: { ...data, bid_time: new Date(), bidder_id: userId },
@@ -43,6 +49,14 @@ export class BidService {
       data: { price: data.price, bid_time: new Date() },
       include: { bidder: true },
     });
+
+    const pushMessage = {
+      title: 'New Bid Alert',
+      data: `${newbid.price} by ${username}`,
+      href: `/auction/${newbid.auction_id}`,
+    };
+
+    this.notificationService.sendPush(newbid.auction_id, pushMessage);
 
     return new BidEntity(newbid);
   }

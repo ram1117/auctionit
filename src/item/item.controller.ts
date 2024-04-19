@@ -36,6 +36,12 @@ export class ItemController {
     return this.itemService.findManyTypes();
   }
 
+  @Roles(USER_ROLES.User)
+  @Get('user/items')
+  getUserItems(@User() user: any) {
+    return this.itemService.findManyByUser(user.id);
+  }
+
   @Post()
   @UseInterceptors(FileInterceptor('item_image'))
   async createItem(
@@ -60,8 +66,8 @@ export class ItemController {
   }
 
   @Get('item/:id')
-  getItemById(@User() user: any, @Param('id') id: string) {
-    return this.itemService.findOne(user.id, id);
+  getItemById(@Param('id') id: string) {
+    return this.itemService.findOne(id);
   }
 
   @Delete(':id')

@@ -61,7 +61,7 @@ export class NotificationService {
 
   async sendPush(auction_id: string, notificationData: any) {
     console.log('sending push message ', new Date());
-
+    console.log(auction_id);
     await firebase
       .messaging()
       .send({

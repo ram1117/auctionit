@@ -19,7 +19,6 @@ model user_ {
   bids                bid[]
   notification_tokens notification_token[]
   subscription        subscription[]
-  auction             auction[]
 }
 
 model item {
@@ -64,8 +63,6 @@ model auction {
   auction_category   auction_category @relation(fields: [auction_categoryId], references: [id])
   auction_categoryId Int
   subscription       subscription[]
-  user_              user_?           @relation(fields: [user_Id], references: [id])
-  user_Id            String?
 }
 
 model bid {
