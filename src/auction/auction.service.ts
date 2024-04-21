@@ -30,9 +30,23 @@ export class AuctionService {
     });
   }
 
-  async findMany() {
+  async findManyAdmin(status: string) {
+    const statusQuery = {
+      all: {},
+      live: { isComplete: false, isCancelled: false },
+      ended: { isComplete: true, isCancelled: false },
+      cancelled: { isCancelled: true },
+    };
+
+    const query = statusQuery[status];
+
     return await this.prisma.auction.findMany({
       orderBy: { createdAt: 'desc' },
+      where: query,
+      include: {
+        item: { select: { imageUrl: true, name: true, final_price: true } },
+        _count: { select: { bids: true } },
+      },
     });
   }
 
@@ -47,8 +61,12 @@ export class AuctionService {
 
     const filter =
       category_id === 0
-        ? { isComplete: false }
-        : { isComplete: false, auction_categoryId: category_id };
+        ? { isComplete: false, isCancelled: false }
+        : {
+            isComplete: false,
+            auction_categoryId: category_id,
+            isCancelled: false,
+          };
 
     return await this.prisma.auction.findMany({
       where: filter,
@@ -67,17 +85,28 @@ export class AuctionService {
     });
   }
 
+  async findManyCategories() {
+    return await this.prisma.auction_category.findMany({
+      select: { id: true, type: true },
+    });
+  }
+
   async createOne(data: CreateAuctionDto) {
     const item = await this.prisma.item.findFirst({
       where: { AND: [{ id: data.item_id }] },
     });
     if (!item)
-      throw new ForbiddenException(
-        'not authorized to create an auction for this item',
-        { cause: new Error(), description: 'Forbidden' },
-      );
+      throw new ForbiddenException('Item doesnt exist', {
+        cause: new Error(),
+        description: 'Forbidden',
+      });
     if (item.isSold)
       throw new ForbiddenException('Item has already been sold', {
+        cause: new Error(),
+        description: 'Forbidden',
+      });
+    if (item.not_for_sale)
+      throw new ForbiddenException('Item is not for sale', {
         cause: new Error(),
         description: 'Forbidden',
       });
@@ -106,8 +135,11 @@ export class AuctionService {
     });
   }
 
-  async updateOne(data: any, id: string) {
-    return await this.prisma.auction.update({ where: { id }, data: data });
+  async updateOne(id: string) {
+    return await this.prisma.auction.update({
+      where: { id },
+      data: { isCancelled: true, isComplete: false },
+    });
   }
 
   async deleteOne(id: string) {
@@ -122,6 +154,7 @@ export class AuctionService {
       where: {
         deadline: { gte: lastTenMinutes, lte: new Date() },
         isComplete: false,
+        isCancelled: false,
       },
       include: { bids: { orderBy: { bid_time: 'desc' } } },
     });
@@ -135,6 +168,7 @@ export class AuctionService {
             isSold: true,
             winner_id: topBid.bidder_id,
             final_price: topBid.price,
+            win_bid_id: topBid.id,
           },
         });
       }
@@ -146,7 +180,7 @@ export class AuctionService {
       const pushMessage = {
         title: 'Auction ended',
         data: hasBids ? 'Sold' : 'Unsold',
-        href: `/auction/${auction.id}`,
+        href: `/auctions/${auction.id}`,
       };
 
       await this.notificationService.sendPush(auction.id, pushMessage);

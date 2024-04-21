@@ -33,7 +33,10 @@ model item {
   winner_id    String?
   winner       user_?    @relation(fields: [winner_id], references: [id])
   final_price  Decimal?
-  bid          bid[]
+  win_bid_id   String?   @unique
+  win_bid      bid?      @relation(fields: [win_bid_id], references: [id])
+  createdAt    DateTime? @default(now())
+  not_for_sale Boolean   @default(false)
 }
 
 model item_type {
@@ -58,6 +61,7 @@ model auction {
   item               item             @relation(fields: [item_id], references: [id], onDelete: Cascade)
   deadline           DateTime         @default(dbgenerated("NOW() + interval '48 hours'"))
   isComplete         Boolean          @default(false)
+  isCancelled        Boolean          @default(false)
   createdAt          DateTime         @default(now())
   start_value        Float            @default(0.00)
   bids               bid[]
@@ -74,8 +78,7 @@ model bid {
   bidder     user_    @relation(fields: [bidder_id], references: [id], onDelete: Cascade)
   price      Float    @default(0.00)
   bid_time   DateTime @default(now())
-  item       item?    @relation(fields: [itemId], references: [id])
-  itemId     String?
+  item       item?
 }
 
 model notification {

@@ -58,7 +58,7 @@ export class BidService {
     const pushMessage = {
       title: 'New Bid Alert',
       data: `${newbid.price} by ${username}`,
-      href: `/auction/${newbid.auction_id}`,
+      href: `/auctions/${newbid.auction_id}`,
     };
 
     this.notificationService.sendPush(newbid.auction_id, pushMessage);

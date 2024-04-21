@@ -38,20 +38,31 @@ export class AuctionController {
     );
   }
 
-  @Roles(USER_ROLES.User)
+  @Public()
+  @Get('auction/categories')
+  getAuctionCategories() {
+    return this.auctionService.findManyCategories();
+  }
+
+  @Roles(USER_ROLES.User, USER_ROLES.Admin)
   @Get('auction/:id')
   getAuction(@Param('id') id: string) {
     return this.auctionService.findOne(id);
   }
 
+  @Get('admin/auctions')
+  getAuctionsAdmin(@Query('status') status: string = 'all') {
+    return this.auctionService.findManyAdmin(status);
+  }
+
   @Post()
-  async createAuction(@Body() data: CreateAuctionDto) {
+  createAuction(@Body() data: CreateAuctionDto) {
     return this.auctionService.createOne(data);
   }
 
   @Patch(':id')
-  updateAuction(@Body() data: any, @Param('id') id: string) {
-    return this.auctionService.updateOne(data, id);
+  updateAuction(@Param('id') id: string) {
+    return this.auctionService.updateOne(id);
   }
 
   @Delete(':id')

@@ -14,6 +14,9 @@ class CreateItemDto {
   @IsNumber()
   @Transform(({ value }) => Number.parseInt(value))
   item_type_id: number;
+
+  @IsString()
+  imageUrl: string;
 }
 
 export default CreateItemDto;

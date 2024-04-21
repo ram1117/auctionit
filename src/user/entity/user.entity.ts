@@ -11,9 +11,6 @@ class UserEntity {
   role: string;
   @Exclude()
   password: string;
-
-  @Exclude()
-  isVerified: boolean;
 }
 
 export default UserEntity;
