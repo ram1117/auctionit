@@ -26,11 +26,7 @@ async function bootstrap() {
   const corsOptions = {
     credentials: true,
     methods: ['GET', 'PUT', 'POST', 'PATCH', 'DELETE'],
-    origin: [
-      'https://auctionit-fe.vercel.app',
-      'http://localhost:3001',
-      'http://localhost:3000',
-    ],
+    origin: ['https://auctionit-fe.vercel.app'],
     allowedHeaders: ['Content-Type'],
   };
 
