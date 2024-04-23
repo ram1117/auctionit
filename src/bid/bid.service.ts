@@ -1,9 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import CreateBidDto from './dtos/createBid.dto';
 import { SubscribeService } from '../subscribe/subscribe.service';
 import { BidEntity } from './enities/bid.entity';
 import { NotificationService } from '../notification/notification.service';
+import { AuctionService } from '../auction/auction.service';
 
 @Injectable()
 export class BidService {
@@ -11,6 +16,7 @@ export class BidService {
     private prisma: PrismaService,
     private subscribeService: SubscribeService,
     private notificationService: NotificationService,
+    private auctionService: AuctionService,
   ) {}
 
   async findMany(userId: string) {
@@ -30,9 +36,35 @@ export class BidService {
   }
 
   async createOrUpdate(data: CreateBidDto, userId: string, username: string) {
+    const auction = await this.auctionService.findOne(data.auction_id);
+    if (!auction)
+      throw new NotFoundException({
+        message: 'Auction not found',
+        error: 'NotFound',
+      });
+    if (auction.deadline < new Date() || auction.isCancelled) {
+      throw new ForbiddenException('Auction might have ended or cancelled', {
+        cause: new Error(),
+        description: 'Forbidden',
+      });
+    }
+
+    if (data.price < auction.start_value) {
+      throw new ForbiddenException(
+        'Bid price should be greater than start price',
+        {
+          cause: new Error(),
+          description: 'Forbidden',
+        },
+      );
+    }
+
     const bid = await this.prisma.bid.findFirst({
       where: {
-        AND: { bidder_id: userId, auction_id: data.auction_id },
+        AND: {
+          bidder_id: userId,
+          auction_id: data.auction_id,
+        },
       },
     });
 

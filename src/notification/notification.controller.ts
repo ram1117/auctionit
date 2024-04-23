@@ -26,6 +26,6 @@ export class NotificationController {
 
   @Get('tokens')
   getNotificationTokens(@User() user: any) {
-    return this.notificationService.findManyTokens(user.id);
+    return this.notificationService.getUserTokens(user.id);
   }
 }

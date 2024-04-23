@@ -121,7 +121,9 @@ export class AuctionService {
       );
 
     const auction = await this.prisma.auction.findFirst({
-      where: { AND: [{ item_id: data.item_id, isComplete: false }] },
+      where: {
+        AND: [{ item_id: data.item_id, isComplete: false, isCancelled: false }],
+      },
     });
 
     if (auction)

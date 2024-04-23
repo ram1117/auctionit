@@ -82,24 +82,21 @@ model bid {
 }
 
 model notification {
-  id                   String             @id @default(uuid())
-  notification_token   notification_token @relation(fields: [notification_tokenId], references: [id])
-  notification_tokenId String
-  title                String
-  body                 String
-  href                 String?
-  createdAt            DateTime           @default(now())
-  isRead               Boolean            @default(false)
+  id        String   @id @default(uuid())
+  title     String
+  body      String
+  href      String?
+  createdAt DateTime @default(now())
+  isRead    Boolean  @default(false)
 }
 
 model notification_token {
-  id                 String         @id @default(uuid())
+  id                 String  @id @default(uuid())
   user_id            String
-  user               user_          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user               user_   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   device_type        String
-  notification_token String         @unique
-  active             Boolean        @default(true)
-  notifications      notification[]
+  notification_token String  @unique
+  active             Boolean @default(true)
 }
 
 model subscription {
