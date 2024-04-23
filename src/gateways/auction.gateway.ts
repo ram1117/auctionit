@@ -9,7 +9,7 @@ import { Server, Socket } from 'socket.io';
 @Injectable()
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: 'https://auctionit-fe.vercel.app/',
   },
 })
 export class AuctionGateway {

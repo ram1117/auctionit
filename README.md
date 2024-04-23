@@ -2,14 +2,18 @@
 
 ## Description
 
-**AuctionIt** is the backend NestJs application for a auction website. A user will be able to sign up, post an item for auction, after approval, other users will see the auction and can place bids.
+**AuctionIt** is the backend NestJs application for an auction website. Admin users can create items, create auctions for each item and do other CRUD operations. Users can signup, view live auctions and place bids for items.
+
+Applciation uses WebSocket IO to send real time bid values for each auction. Application sends push notifications to users with Firebase FCM.
+
+A cron job is scheduled to run every five minutes to check for ended auctions and update winning bids.
 
 ## Live Demo
 
 TBA
-A live version of the application is hosted [TBA]().
+A live version of the application is hosted [on Render](https://auctionit-vst0.onrender.com/api/v1/auctions/live).
 
-<!-- The service is deployed in free tier and will not be instantly available. Please wait a few minutes for the application to start -->
+The service is deployed in free tier and may not be available instantly. Please wait a few minutes for the application to start
 
 ## Getting Started
 
@@ -27,7 +31,7 @@ Please run the following command to install the npm dependency packages.
 $ npm install
 ```
 
-Before running the app, you will need to run docker container to use database in your local machine. Run the following command to start the docker postgres image(Docker Desktop or Docker Engine need to be installed for this). If you have postgres installed in your system, you will not need to run the docker.
+Before running the app, you will need to run docker container to use database as a docker image. Run the following command to start the docker postgres image(Docker Desktop or Docker Engine need to be installed for this). If you have postgres installed in your system, you do not need to run the docker.
 
 ```bash
 $ docker compose up -d
@@ -37,8 +41,11 @@ Create `.env.development` file at the root of the project and add following keys
 
 ```bash
 DATABASE_URL="postgresql://<username>:<password>@localhost:5432/<dbname>"
-DB_SYNC=true
-JWT_SECRET="<add your own secret>"
+FIREBASE_CONFIG='{
+"projectId":"<YOUR_FIREBASE_PROJECT_ID>",
+"clientEmail":"<YOUR_FIREBASE_CLIENT_EMAIL>",
+"privateKey":"<YOUR_FIREBASE_PRIVATE_KEY"
+}'
 ```
 
 ## Running the app
@@ -55,12 +62,6 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
-
-## Swagger documentation
-
-You can access swagger documentation at below URL after starting the development server
-
-http://localhost:3001/api/
 
 ## Test
 
