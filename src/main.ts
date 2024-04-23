@@ -25,7 +25,8 @@ async function bootstrap() {
 
   const corsOptions = {
     credentials: true,
-    origin: 'https://auctionit-fe.vercel.app:3000',
+    origin: 'https://auctionit-fe.vercel.app',
+    allowedHeaders: ['Content-Type'],
   };
 
   app.enableCors(corsOptions);
