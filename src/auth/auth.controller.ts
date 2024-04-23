@@ -28,7 +28,7 @@ export class AuthController {
   ) {
     const token = await this.authService.generateToken(req.user);
     response.cookie('token', token, {
-      sameSite: 'strict',
+      sameSite: 'none',
       httpOnly: true,
     });
     return new UserEntity(req.user);
