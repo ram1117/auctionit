@@ -23,13 +23,17 @@ async function bootstrap() {
   app.use(cookieParser());
   app.setGlobalPrefix('api/v1');
 
-  // const corsOptions = {
-  //   credentials: true,
-  //   origin: 'https://auctionit-fe.vercel.app',
-  //   allowedHeaders: ['Content-Type'],
-  // };
+  const corsOptions = {
+    credentials: true,
+    origin: [
+      'https://auctionit-fe.vercel.app',
+      'http://localhost:3001',
+      'http://localhost:3000',
+    ],
+    allowedHeaders: ['Content-Type'],
+  };
 
-  // app.enableCors(corsOptions);
+  app.enableCors(corsOptions);
 
   await app.listen(3000);
 }
