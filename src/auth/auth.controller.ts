@@ -11,6 +11,7 @@ import CreateUserDto from '../user/dtos/createuser.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import UserEntity from '../user/entity/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -30,7 +31,7 @@ export class AuthController {
       sameSite: 'strict',
       httpOnly: true,
     });
-    return { success: true, message: 'Signin Successful' };
+    return new UserEntity(req.user);
   }
 
   @Post('signup')

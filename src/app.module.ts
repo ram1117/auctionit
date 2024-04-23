@@ -11,7 +11,6 @@ import { AuthModule } from './auth/auth.module';
 import PrismaExceptionFilter from './filters/PrismaException.filter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NotificationModule } from './notification/notification.module';
-import { SupabaseModule } from './supabase/supabase.module';
 
 @Module({
   imports: [
@@ -28,7 +27,6 @@ import { SupabaseModule } from './supabase/supabase.module';
     AuthModule,
     ScheduleModule.forRoot(),
     NotificationModule,
-    SupabaseModule,
   ],
   controllers: [],
   providers: [

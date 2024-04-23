@@ -4,7 +4,7 @@ import { IsString, MinLength, MaxLength, IsNumber } from 'class-validator';
 class CreateItemDto {
   @IsString()
   @MinLength(3)
-  @MaxLength(26)
+  @MaxLength(60)
   name: string;
 
   @IsString()
@@ -14,6 +14,9 @@ class CreateItemDto {
   @IsNumber()
   @Transform(({ value }) => Number.parseInt(value))
   item_type_id: number;
+
+  @IsString()
+  imageUrl: string;
 }
 
 export default CreateItemDto;

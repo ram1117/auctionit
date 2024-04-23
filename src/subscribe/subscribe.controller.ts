@@ -5,26 +5,28 @@ import { User } from '../decorators/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('subscribe')
-@UseGuards(JwtAuthGuard)
 export class SubscribeController {
   constructor(private subscriptionService: SubscribeService) {}
 
   @Get()
-  getAuctions(
-    @User() user: any,
-    @Query('page') pageNo: string = '1',
-    @Query('items') itemsPerPage: string = '50',
-  ) {
-    return this.subscriptionService.findMany(
-      user.id,
-      parseInt(pageNo),
-      parseInt(itemsPerPage),
-    );
+  getAuctions(@User() user: any) {
+    return this.subscriptionService.findMany(user.id);
+  }
+
+  @Get(':id')
+  getAuction(@Param('id') id: string, @User() user: any) {
+    return this.subscriptionService.findOne(id, user.id);
   }
 
   @Post(':id')
-  subscribeToAuction(@Param('id') auction_id: string, @User() user: any) {
-    return this.subscriptionService.create(user.id, auction_id);
+  subscribeToAuction(
+    @Param('id') auction_id: string,
+    @Query('enabled') enabled: string,
+    @User() user: any,
+  ) {
+    return this.subscriptionService.createOrUpdate(user.id, auction_id, {
+      notificationEnabled: enabled === 'true',
+    });
   }
 
   @Post('/unsubscribe/:id')

@@ -1,4 +1,12 @@
-import { Body, Controller, Post, UseGuards, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Param,
+  Get,
+  Patch,
+} from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { AcceptNotificationDto } from './dtos/acceptNotification.dto';
 import { User } from '../decorators/user.decorator';
@@ -9,9 +17,9 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 export class NotificationController {
   constructor(private notificationService: NotificationService) {}
 
-  @Post()
+  @Post('token')
   postToken(@Body() data: AcceptNotificationDto, @User() user: any) {
-    return this.notificationService.acceptPushNotification(user.id, data);
+    return this.notificationService.addToken(user.id, data);
   }
 
   @Post('subscribe/:id')
@@ -20,7 +28,27 @@ export class NotificationController {
   }
 
   @Post('unsubscribe/:id')
-  unsubscribeTopic(@Body('id') auction_id: string, @User() user: any) {
+  unsubscribeTopic(@Param('id') auction_id: string, @User() user: any) {
     return this.notificationService.unsubscribeTopic(user.id, auction_id);
+  }
+
+  @Get('tokens')
+  getNotificationTokens(@User() user: any) {
+    return this.notificationService.getUserTokens(user.id);
+  }
+
+  @Patch(':id')
+  updateNotification(@Param() id: string, @User() user: any) {
+    return this.notificationService.updateOne(id, user.id);
+  }
+
+  @Patch('markall')
+  updateManyNotifications(@User() user: any) {
+    return this.notificationService.updateMany(user.id);
+  }
+
+  @Get('allnotifications')
+  getNotifications(@User() user: any) {
+    return this.notificationService.findMany(user.id);
   }
 }

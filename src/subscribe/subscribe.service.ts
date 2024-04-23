@@ -1,17 +1,33 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class SubscribeService {
   constructor(private prisma: PrismaService) {}
 
-  async findMany(userId: string, page: number, itemsPerPage: number) {
-    const start = (page - 1) * itemsPerPage;
+  async findOne(id: string, userId: string) {
+    const subscription = await this.prisma.subscription.findFirst({
+      where: { auction_id: id, user_id: userId },
+    });
+    if (!subscription)
+      throw new NotFoundException({
+        error: 'NotFound',
+        message: 'Item Not found',
+      });
+    return subscription;
+  }
 
+  async findMany(userId: string) {
     return await this.prisma.subscription.findMany({
       where: { user_id: userId },
-      skip: start,
-      take: itemsPerPage,
+      orderBy: { auction: { deadline: 'desc' } },
+      include: {
+        auction: {
+          include: {
+            item: { select: { id: true, name: true, imageUrl: true } },
+          },
+        },
+      },
     });
   }
 
@@ -26,11 +42,26 @@ export class SubscribeService {
     });
   }
 
-  async createOrUpdate(userId: string, auctionId: string) {
-    return await this.prisma.subscription.upsert({
-      where: { user_id_auction_id: { user_id: userId, auction_id: auctionId } },
-      update: { notificationEnabled: true },
-      create: {
+  async createOrUpdate(
+    userId: string,
+    auctionId: string,
+    data: { notificationEnabled: boolean },
+  ) {
+    const subscription = await this.prisma.subscription.findFirst({
+      where: { user_id: userId, auction_id: auctionId },
+    });
+    if (subscription) {
+      const subscription = await this.prisma.subscription.update({
+        where: {
+          user_id_auction_id: { user_id: userId, auction_id: auctionId },
+        },
+        data: { notificationEnabled: data.notificationEnabled },
+      });
+      return subscription;
+    }
+
+    return await this.prisma.subscription.create({
+      data: {
         user_id: userId,
         auction_id: auctionId,
         notificationEnabled: true,

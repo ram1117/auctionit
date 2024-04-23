@@ -14,35 +14,37 @@ model user_ {
   username            String               @unique
   password            String
   location            String
-  isVerified          Boolean              @default(false)
   role                String               @default("user")
   items               item[]
-  auctions            auction[]
   bids                bid[]
   notification_tokens notification_token[]
   subscription        subscription[]
+  notifications       notification[]
 }
 
 model item {
-  id             String    @id @default(uuid())
-  name           String
-  description    String
-  isSold         Boolean   @default(false)
-  isApproved     Boolean   @default(false)
-  imageUrl       String    @default("")
-  owner_id       String
-  owner          user_     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
-  item_type_id   Int
-  item_type      item_type @relation(fields: [item_type_id], references: [id])
-  auctions       auction[]
-  winning_bid_id String?   @unique
-  winning_bid    bid?      @relation(fields: [winning_bid_id], references: [id])
+  id           String    @id @default(uuid())
+  name         String
+  description  String
+  isSold       Boolean   @default(false)
+  imageUrl     String    @default("")
+  item_type_id Int
+  item_type    item_type @relation(fields: [item_type_id], references: [id])
+  auctions     auction[]
+  winner_id    String?
+  winner       user_?    @relation(fields: [winner_id], references: [id])
+  final_price  Decimal?
+  win_bid_id   String?   @unique
+  win_bid      bid?      @relation(fields: [win_bid_id], references: [id])
+  createdAt    DateTime? @default(now())
+  not_for_sale Boolean   @default(false)
 }
 
 model item_type {
   id          Int     @id @default(autoincrement())
   type        String
   description String?
+  iconUrl     String?
   items       item[]
 }
 
@@ -50,6 +52,7 @@ model auction_category {
   id          Int       @id @default(autoincrement())
   type        String
   description String?
+  iconUrl     String?
   auctions    auction[]
 }
 
@@ -57,15 +60,15 @@ model auction {
   id                 String           @id @default(uuid())
   item_id            String
   item               item             @relation(fields: [item_id], references: [id], onDelete: Cascade)
-  deadline           DateTime         @default(dbgenerated("NOW() + interval '24 hours'"))
+  deadline           DateTime         @default(dbgenerated("NOW() + interval '48 hours'"))
   isComplete         Boolean          @default(false)
+  isCancelled        Boolean          @default(false)
   createdAt          DateTime         @default(now())
   start_value        Float            @default(0.00)
-  creater_id         String
-  creator            user_            @relation(fields: [creater_id], references: [id], onDelete: Cascade)
   bids               bid[]
   auction_category   auction_category @relation(fields: [auction_categoryId], references: [id])
   auction_categoryId Int
+  subscription       subscription[]
 }
 
 model bid {
@@ -80,28 +83,28 @@ model bid {
 }
 
 model notification {
-  id                   String             @id @default(uuid())
-  notification_token   notification_token @relation(fields: [notification_tokenId], references: [id])
-  notification_tokenId String
-  title                String
-  body                 String
-  href                 String?
-  createdAt            DateTime           @default(now())
-  isRead               Boolean            @default(false)
+  id        String   @id @default(uuid())
+  title     String
+  body      String
+  href      String?
+  createdAt DateTime @default(now())
+  isRead    Boolean  @default(false)
+  user_id   String
+  user      user_    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model notification_token {
-  id                 String         @id @default(uuid())
+  id                 String  @id @default(uuid())
   user_id            String
-  user               user_          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user               user_   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   device_type        String
-  notification_token String         @unique
-  active             Boolean        @default(true)
-  notifications      notification[]
+  notification_token String  @unique
+  active             Boolean @default(true)
 }
 
 model subscription {
   auction_id          String
+  auction             auction @relation(fields: [auction_id], references: [id], onDelete: Cascade)
   user_id             String
   user                user_   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   notificationEnabled Boolean @default(false)

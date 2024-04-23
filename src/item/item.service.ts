@@ -1,42 +1,70 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import CreateItemDto from './dtos/CreateItem.dto';
+import ItemEntity from './entities/Item.entity';
 
 @Injectable()
 export class ItemService {
   constructor(private prisma: PrismaService) {}
 
-  async findManyByUser(userid: string) {
-    return await this.prisma.item.findMany({ where: { owner_id: userid } });
+  async findOne(id: string) {
+    const item = await this.prisma.item.findFirstOrThrow({
+      where: { id },
+      include: {
+        auctions: { orderBy: { deadline: 'desc' } },
+        win_bid: { include: { bidder: true } },
+      },
+    });
+
+    return new ItemEntity(item);
   }
 
-  async findOne(userid: string, id: string) {
-    return await this.prisma.item.findFirstOrThrow({
-      where: { id, owner_id: userid },
+  async findManyByUser(id: string) {
+    return await this.prisma.item.findMany({
+      where: { winner_id: id },
     });
   }
 
-  async create(data: CreateItemDto, imageUrl: string, userId: string) {
+  async findManyTypes() {
+    return await this.prisma.item_type.findMany();
+  }
+
+  async findManyItems(status: string) {
+    const ItemQuery = {
+      sold: { isSold: true },
+      unsold: { isSold: false, not_for_sale: false },
+      nosale: { not_for_sale: true },
+    };
+    const condition = ItemQuery[status];
+
+    return await this.prisma.item.findMany({
+      where: condition,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async create(data: CreateItemDto) {
     await this.prisma.item.create({
-      data: { ...data, imageUrl, owner_id: userId },
+      data,
     });
     return { message: 'Item created successfully', success: true };
   }
 
-  async updateApproval(id: string) {
-    return await this.prisma.item.update({
-      where: { id },
-      data: { isApproved: true },
-    });
-  }
-
-  async findUnapproved() {
-    return await this.prisma.item.findMany({
-      where: { isApproved: false },
-    });
-  }
-
   async deleteOne(id: string) {
     return await this.prisma.item.delete({ where: { id } });
+  }
+
+  async updateOne(id: string, notForSale: boolean) {
+    const currenTime = new Date();
+    if (notForSale)
+      await this.prisma.auction.updateMany({
+        where: { isComplete: false, isCancelled: false, item_id: id },
+        data: { isCancelled: true, deadline: currenTime },
+      });
+
+    return await this.prisma.item.update({
+      where: { id },
+      data: { not_for_sale: notForSale },
+    });
   }
 }

@@ -4,15 +4,13 @@ class UserEntity {
   constructor(partial: Partial<UserEntity>) {
     Object.assign(this, partial);
   }
+  @Exclude()
   id: string;
   username: string;
   email: string;
-  @Exclude()
-  password: string;
-  @Exclude()
   role: string;
   @Exclude()
-  isVerified: boolean;
+  password: string;
 }
 
 export default UserEntity;

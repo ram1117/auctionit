@@ -17,13 +17,36 @@ export class AuctionService {
   ) {}
 
   async findOne(id: string) {
-    return await this.prisma.auction.findUniqueOrThrow({ where: { id } });
+    return await this.prisma.auction.findFirst({
+      where: { id },
+      include: {
+        item: true,
+        bids: {
+          orderBy: { price: 'desc' },
+          take: 1,
+          include: { bidder: { select: { username: true } } },
+        },
+      },
+    });
   }
 
-  async findMany(userId: string) {
+  async findManyAdmin(status: string) {
+    const statusQuery = {
+      all: {},
+      live: { isComplete: false, isCancelled: false },
+      ended: { isComplete: true, isCancelled: false },
+      cancelled: { isCancelled: true },
+    };
+
+    const query = statusQuery[status];
+
     return await this.prisma.auction.findMany({
-      where: { creater_id: userId },
       orderBy: { createdAt: 'desc' },
+      where: query,
+      include: {
+        item: { select: { imageUrl: true, name: true, final_price: true } },
+        _count: { select: { bids: true } },
+      },
     });
   }
 
@@ -38,39 +61,52 @@ export class AuctionService {
 
     const filter =
       category_id === 0
-        ? { isComplete: false }
-        : { isComplete: false, auction_categoryId: category_id };
+        ? { isComplete: false, isCancelled: false }
+        : {
+            isComplete: false,
+            auction_categoryId: category_id,
+            isCancelled: false,
+          };
 
     return await this.prisma.auction.findMany({
       where: filter,
+      orderBy: AUCTION_SORT_KEY[sortBy],
       include: {
         auction_category: true,
-        creator: { select: { username: true, email: true } },
         item: { select: { name: true, description: true, imageUrl: true } },
         _count: { select: { bids: true } },
+        bids: {
+          orderBy: { price: 'desc' },
+          take: 1,
+        },
       },
-      orderBy: AUCTION_SORT_KEY[sortBy],
       skip: start,
       take: end,
     });
   }
 
-  async createOne(data: CreateAuctionDto, userId: string) {
+  async findManyCategories() {
+    return await this.prisma.auction_category.findMany({
+      select: { id: true, type: true },
+    });
+  }
+
+  async createOne(data: CreateAuctionDto) {
     const item = await this.prisma.item.findFirst({
-      where: { AND: [{ id: data.item_id }, { owner_id: userId }] },
+      where: { AND: [{ id: data.item_id }] },
     });
     if (!item)
-      throw new ForbiddenException(
-        'not authorized to create an auction for this item',
-        { cause: new Error(), description: 'Forbidden' },
-      );
+      throw new ForbiddenException('Item doesnt exist', {
+        cause: new Error(),
+        description: 'Forbidden',
+      });
     if (item.isSold)
       throw new ForbiddenException('Item has already been sold', {
         cause: new Error(),
         description: 'Forbidden',
       });
-    if (!item.isApproved)
-      throw new ForbiddenException('Item has to be approved to be auctioned', {
+    if (item.not_for_sale)
+      throw new ForbiddenException('Item is not for sale', {
         cause: new Error(),
         description: 'Forbidden',
       });
@@ -85,7 +121,9 @@ export class AuctionService {
       );
 
     const auction = await this.prisma.auction.findFirst({
-      where: { AND: [{ item_id: data.item_id, isComplete: false }] },
+      where: {
+        AND: [{ item_id: data.item_id, isComplete: false, isCancelled: false }],
+      },
     });
 
     if (auction)
@@ -95,28 +133,32 @@ export class AuctionService {
       });
 
     return await this.prisma.auction.create({
-      data: { ...data, creater_id: userId },
+      data: { ...data },
     });
   }
 
-  async updateOne(data: any, id: string) {
-    return await this.prisma.auction.update({ where: { id }, data: data });
+  async updateOne(id: string) {
+    return await this.prisma.auction.update({
+      where: { id },
+      data: { isCancelled: true, isComplete: false },
+    });
   }
 
   async deleteOne(id: string) {
     return await this.prisma.auction.delete({ where: { id } });
   }
 
-  @Interval(1000 * 60 * 10)
+  @Interval(1000 * 60 * 5)
   async checkAuctionCompletion() {
     console.log(`checking ended auctions - ${new Date()}`);
-    const lastTenMinutes = new Date(Date.now() - 1000 * 60 * 11);
+    const lastTenMinutes = new Date(Date.now() - 1000 * 60 * 6);
     const auctions = await this.prisma.auction.findMany({
       where: {
         deadline: { gte: lastTenMinutes, lte: new Date() },
         isComplete: false,
+        isCancelled: false,
       },
-      include: { bids: { orderBy: { bid_time: 'desc' } } },
+      include: { bids: { orderBy: { bid_time: 'desc' } }, item: true },
     });
     auctions.forEach(async (auction) => {
       const hasBids = auction.bids.length !== 0;
@@ -124,9 +166,22 @@ export class AuctionService {
         const topBid = auction.bids[0];
         await this.prisma.item.update({
           where: { id: auction.item_id },
-          data: { isSold: true, winning_bid_id: topBid.id },
+          data: {
+            isSold: true,
+            winner_id: topBid.bidder_id,
+            final_price: topBid.price,
+            win_bid_id: topBid.id,
+          },
         });
+        const message = {
+          title: 'Winner',
+          body: `You have won ${auction.item.name} for ${topBid.price}`,
+          href: `auctions/${auction.id}`,
+          user_id: topBid.bidder_id,
+        };
+        await this.notificationService.createOne([message]);
       }
+
       await this.prisma.auction.update({
         where: { id: auction.id },
         data: { isComplete: true },
@@ -135,7 +190,7 @@ export class AuctionService {
       const pushMessage = {
         title: 'Auction ended',
         data: hasBids ? 'Sold' : 'Unsold',
-        href: `/auction/${auction.id}`,
+        href: `/auctions/${auction.id}`,
       };
 
       await this.notificationService.sendPush(auction.id, pushMessage);
