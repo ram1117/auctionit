@@ -158,7 +158,7 @@ export class AuctionService {
         isComplete: false,
         isCancelled: false,
       },
-      include: { bids: { orderBy: { bid_time: 'desc' } } },
+      include: { bids: { orderBy: { bid_time: 'desc' } }, item: true },
     });
     auctions.forEach(async (auction) => {
       const hasBids = auction.bids.length !== 0;
@@ -173,7 +173,15 @@ export class AuctionService {
             win_bid_id: topBid.id,
           },
         });
+        const message = {
+          title: 'Winner',
+          body: `You have won ${auction.item.name} for ${topBid.price}`,
+          href: `auctions/${auction.id}`,
+          user_id: topBid.bidder_id,
+        };
+        await this.notificationService.createOne([message]);
       }
+
       await this.prisma.auction.update({
         where: { id: auction.id },
         data: { isComplete: true },

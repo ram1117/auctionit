@@ -4,6 +4,8 @@ import { AcceptNotificationDto } from './dtos/acceptNotification.dto';
 import * as firebase from 'firebase-admin';
 import { ConfigService } from '@nestjs/config';
 import { SubscribeService } from '../subscribe/subscribe.service';
+import { CreateNotificationDto } from './dtos/createNotification.dto';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class NotificationService {
@@ -17,6 +19,30 @@ export class NotificationService {
     );
     firebase.initializeApp({
       credential: firebase.credential.cert(firebase_config),
+    });
+  }
+
+  async createOne(data: CreateNotificationDto[]) {
+    return await this.prisma.notification.createMany({ data });
+  }
+
+  async findMany(userId: string) {
+    return await this.prisma.notification.findMany({
+      where: { user_id: userId },
+    });
+  }
+
+  async updateOne(id: string, userId: string) {
+    return await this.prisma.notification.update({
+      where: { id, user_id: userId },
+      data: { isRead: true },
+    });
+  }
+
+  async updateMany(userId: string) {
+    return await this.prisma.notification.updateMany({
+      where: { user_id: userId },
+      data: { isRead: true },
     });
   }
 
@@ -74,5 +100,10 @@ export class NotificationService {
       .catch((error: any) => {
         console.error(error);
       });
+  }
+
+  @Cron('0 4 * * *')
+  async deleteTokens() {
+    await this.prisma.notification.deleteMany({ where: { isRead: true } });
   }
 }

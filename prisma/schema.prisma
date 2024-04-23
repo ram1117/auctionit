@@ -19,6 +19,7 @@ model user_ {
   bids                bid[]
   notification_tokens notification_token[]
   subscription        subscription[]
+  notifications       notification[]
 }
 
 model item {
@@ -88,6 +89,8 @@ model notification {
   href      String?
   createdAt DateTime @default(now())
   isRead    Boolean  @default(false)
+  user_id   String
+  user      user_    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model notification_token {
