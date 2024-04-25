@@ -10,8 +10,9 @@ A cron job is scheduled to run every five minutes to check for ended auctions an
 
 ## Live Demo
 
-TBA
 A live version of the application is hosted [on Render](https://auctionit-vst0.onrender.com/api/v1/auctions/live).
+
+The front-end of the application is hosted [on Vercel](https://auctionit-fe.vercel.app/)
 
 The service is deployed in free tier and may not be available instantly. Please wait a few minutes for the application to start
 
